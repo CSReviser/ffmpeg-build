@@ -26,6 +26,7 @@ cd ffmpeg-$FFMPEG_VERSION
   --cross-prefix=$TOOLCHAIN/bin/arm-linux-androideabi- \
   --enable-cross-compile \
   --ar=$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar \
+  --ranlib=$RANLIB \
   --sysroot=$SYSROOT \
   --enable-gpl \
   --enable-static \
