@@ -36,3 +36,7 @@ cd ffmpeg-$FFMPEG_VERSION
 
 make -j$(nproc)
 make install
+
+# Copy build output to mounted volume (for GitHub Actions)
+mkdir -p /output/armv7a
+cp -r $PREFIX/* /output/armv7a/
