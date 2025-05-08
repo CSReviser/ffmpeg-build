@@ -41,5 +41,6 @@ make -j$(nproc)
 make install
 
 # Copy build output to mounted volume (for GitHub Actions)
-mkdir -p /output/armv7a
-cp -r $PREFIX/* /output/armv7a/
+# /output → /workspace/output に変更
+mkdir -p /workspace/output/armv7a
+cp -r $PREFIX/* /workspace/output/armv7a/
