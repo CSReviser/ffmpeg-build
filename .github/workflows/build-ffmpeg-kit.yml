@@ -22,15 +22,17 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Android SDK をセットアップ
+      - name: Set up Android SDK + NDK (r25c)
         uses: android-actions/setup-android@v2
+        with:
+          ndk-version: 25.2.9519653
 
       - name: android.sh に実行権限を付与
         run: chmod +x ffmpeg-kit/android.sh
 
       - name: ffmpeg-kit をビルド
         working-directory: ffmpeg-kit
-        run: bash -x ./android.sh --debug
+        run: bash -x ./android.sh 2>&1
 
       - name: AAR をアップロード
         uses: actions/upload-artifact@v4
