@@ -30,7 +30,7 @@ jobs:
 
       - name: ffmpeg-kit をビルド
         working-directory: ffmpeg-kit
-        run: ./android.sh
+        run: ./android.sh --debug
 
       - name: AAR をアップロード
         uses: actions/upload-artifact@v4
