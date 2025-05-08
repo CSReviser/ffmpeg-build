@@ -14,6 +14,8 @@ RUN wget https://dl.google.com/android/repository/android-ndk-${ANDROID_NDK_VERS
 
 ENV PATH=$PATH:/opt/android-ndk
 
+RUN ls /opt/android-ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
+
 # ビルドスクリプトコピー
 WORKDIR /ffmpeg
 COPY build-ffmpeg.sh .
