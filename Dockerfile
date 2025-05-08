@@ -18,7 +18,4 @@ ENV PATH=$PATH:/opt/android-ndk
 WORKDIR /ffmpeg
 COPY build-ffmpeg.sh .
 
-RUN ls /opt/android-ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
-RUN ls /opt/android-ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi-ranlib
-
 RUN chmod +x build-ffmpeg.sh && ./build-ffmpeg.sh
