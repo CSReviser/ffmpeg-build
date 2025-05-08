@@ -32,8 +32,9 @@ cd ffmpeg-$FFMPEG_VERSION
   --disable-doc \
   --disable-programs \
   --disable-avdevice \
-  --disable-postproc
-
+  --disable-postproc \
+  --disable-vulkan
+  
 make -j$(nproc)
 make install
 
