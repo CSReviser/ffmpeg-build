@@ -36,11 +36,9 @@ cd ffmpeg-$FFMPEG_VERSION
   --disable-avdevice \
   --disable-postproc \
   --disable-vulkan
-  
+
 make -j$(nproc)
 make install
 
-# Copy build output to mounted volume (for GitHub Actions)
-# /output → /workspace/output に変更
 mkdir -p /workspace/output/armv7a
 cp -r $PREFIX/* /workspace/output/armv7a/
