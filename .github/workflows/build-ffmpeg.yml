@@ -1,0 +1,27 @@
+name: Build FFmpeg for Android
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ffmpeg:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image and extract output
+        run: |
+          mkdir -p output
+          docker build -t ffmpeg-android .
+          docker run --rm -v "$PWD/output:/output" ffmpeg-android
+
+      - name: Upload FFmpeg build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-android-build
+          path: output/
