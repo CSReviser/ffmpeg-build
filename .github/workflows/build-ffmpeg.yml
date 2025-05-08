@@ -20,8 +20,12 @@ jobs:
           docker build -t ffmpeg-android .
           docker run --rm -v ${{ github.workspace }}:/workspace ffmpeg-android
 
+      - name: Copy output from Docker container
+        run: |
+          docker cp $(docker ps -alq):/ffmpeg/android/arm ./output
+
       - name: Upload FFmpeg Android build
         uses: actions/upload-artifact@v4
         with:
-          name: ffmpeg-android-build
-          path: /ffmpeg/android/arm/
+           name: ffmpeg-android-build
+           path: output/
