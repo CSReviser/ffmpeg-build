@@ -16,11 +16,11 @@ jobs:
           git clone https://github.com/CSReviser/ffmpeg-kit.git
           cd ffmpeg-kit
 
-      - name: JDK 11 をセットアップ
+      - name: JDK 17 をセットアップ
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '11'
+          java-version: '17'
 
       - name: Android SDK をセットアップ
         uses: android-actions/setup-android@v2
