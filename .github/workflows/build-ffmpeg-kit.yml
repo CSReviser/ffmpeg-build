@@ -30,6 +30,11 @@ jobs:
       - name: android.sh に実行権限を付与
         run: chmod +x ffmpeg-kit/android.sh
 
+      - name: Force NDK 25.2 for android.sh
+        working-directory: ffmpeg-kit
+        run: |
+          export PATH="/usr/local/lib/android/sdk/ndk/25.2.9519653:$PATH"
+          bash -x ./android.sh > ../build.log 2>&1 || (cat ../build.log && exit 1)
       - name: ffmpeg-kit をビルド
         working-directory: ffmpeg-kit
         run: |
