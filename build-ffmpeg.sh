@@ -40,5 +40,8 @@ cd ffmpeg-$FFMPEG_VERSION
 make -j$(nproc)
 make install
 
+echo "=== Contents of \$PREFIX ==="
+ls -lR $PREFIX
+
 mkdir -p /workspace/output/armv7a
 cp -r $PREFIX/* /workspace/output/armv7a/
