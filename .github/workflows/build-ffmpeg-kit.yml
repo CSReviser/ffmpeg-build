@@ -1,0 +1,40 @@
+name: Build FFmpegKit AAR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 作業用ディレクトリを作成
+        run: mkdir ffmpeg-kit && cd ffmpeg-kit
+
+      - name: ffmpeg-kit のソースを clone（forkから）
+        run: |
+          git clone https://github.com/CSReviser/ffmpeg-kit.git
+          cd ffmpeg-kit
+
+      - name: JDK 11 をセットアップ
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Android SDK をセットアップ
+        uses: android-actions/setup-android@v2
+
+      - name: android.sh に実行権限を付与
+        run: chmod +x ffmpeg-kit/android.sh
+
+      - name: ffmpeg-kit をビルド
+        working-directory: ffmpeg-kit
+        run: ./android.sh
+
+      - name: AAR をアップロード
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-kit-aar
+          path: ffmpeg-kit/prebuilt/bundle-android-aar/
+          if-no-files-found: error
