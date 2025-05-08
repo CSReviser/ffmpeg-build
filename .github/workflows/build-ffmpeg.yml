@@ -18,9 +18,9 @@ jobs:
         run: |
           mkdir -p output
           docker build -t ffmpeg-android .
-          docker run --rm -v "$PWD/output:/output" ffmpeg-android
+          docker run --rm -v ${{ github.workspace }}:/workspace ffmpeg-android
 
-      - name: Upload FFmpeg build artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ffmpeg-android-build
