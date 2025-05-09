@@ -38,7 +38,7 @@ jobs:
       - name: Build ffmpeg-kit
         working-directory: ffmpeg-kit
         run: |
-          bash -x ./android.sh > ../build.log 2>&1 || (cat ../build.log && exit 1)
+          bash -x ./android.sh --enable-gpl --enable-nonfree --preset full > ../build.log 2>&1 || (cat ../build.log && exit 1)
 
       - name: AAR をアップロード
         uses: actions/upload-artifact@v4
