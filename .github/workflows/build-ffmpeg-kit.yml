@@ -15,7 +15,7 @@ jobs:
         run: |
           git clone https://github.com/CSReviser/ffmpeg-kit.git
           cd ffmpeg-kit
-          git checkout release/5.1
+          git checkout v5.1.LTS
 
       - name: JDK 17 をセットアップ
         uses: actions/setup-java@v3
