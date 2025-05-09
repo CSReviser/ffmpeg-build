@@ -19,7 +19,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            yasm pkg-config build-essential \
+            yasm nasm pkg-config build-essential \
             autoconf automake libtool \
             zlib1g-dev curl
 
