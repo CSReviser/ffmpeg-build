@@ -1,0 +1,44 @@
+name: Build FFmpeg Static
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04  # または ubuntu-24.04 に変更可能
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            autoconf automake build-essential cmake libtool git \
+            pkg-config texinfo nasm yasm \
+            libssl-dev libmp3lame-dev zlib1g-dev
+
+      - name: Clone FFmpeg
+        run: |
+          git clone --depth=1 https://github.com/FFmpeg/FFmpeg.git ffmpeg
+          cd ffmpeg
+          ./configure \
+            --prefix=$HOME/ffmpeg-static \
+            --pkg-config-flags="--static" \
+            --extra-cflags="-static -I/usr/include" \
+            --extra-ldflags="-static -L/usr/lib" \
+            --enable-gpl \
+            --enable-nonfree \
+            --enable-libmp3lame \
+            --enable-openssl \
+            --enable-protocol=https \
+            --enable-protocol=hls \
+            --disable-shared \
+            --enable-static \
+            --disable-debug \
+            --disable-doc
+          make -j$(nproc)
+          make install
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-static
+          path: ~/ffmpeg-static
