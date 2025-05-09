@@ -25,14 +25,6 @@ jobs:
         echo "OUTPUT = $HOME/musl-cross" >> config.mak
         make -j$(nproc)
         make install
-    - name: Install musl-cross-make
-      run: |
-        git clone https://github.com/richfelker/musl-cross-make
-        cd musl-cross-make
-        echo "TARGET = x86_64-linux-musl" >> config.mak
-        echo "OUTPUT = $HOME/musl-cross" >> config.mak
-        make -j$(nproc)
-        make install
         ls -lh $HOME/musl-cross/bin/
         file $HOME/musl-cross/bin/x86_64-linux-musl-gcc || echo "コンパイラが存在しません"
         chmod +x $HOME/musl-cross/bin/x86_64-linux-musl-gcc || true
