@@ -44,6 +44,37 @@ jobs:
           make -j$(nproc)
           make install
 
+# OpenSSL の pkgconfig を有効にする
+export PKG_CONFIG_PATH="$HOME/deps/openssl/lib/pkgconfig"
+
+# FFmpeg ソース取得
+git clone https://github.com/FFmpeg/FFmpeg.git
+cd FFmpeg
+
+# configure 実行
+./configure \
+  --prefix=$HOME/ffmpeg-musl \
+  --pkg-config-flags="--static" \
+  --extra-cflags="-I$HOME/deps/lame/include -I$HOME/deps/openssl/include" \
+  --extra-ldflags="-L$HOME/deps/lame/lib -L$HOME/deps/openssl/lib -static" \
+  --extra-libs="-lssl -lcrypto -lz" \
+  --enable-gpl \
+  --enable-nonfree \
+  --enable-libmp3lame \
+  --enable-openssl \
+  --enable-protocol=https \
+  --enable-protocol=hls \
+  --disable-shared \
+  --enable-static \
+  --disable-debug \
+  --disable-doc \
+  --cc=$HOME/musl-cross/bin/x86_64-linux-musl-gcc
+
+# ビルドとインストール
+make -j$(nproc)
+make install
+
+
       - name: Build FFmpeg (static with openssl)
         run: |
           git clone https://github.com/FFmpeg/FFmpeg.git
