@@ -67,6 +67,7 @@ jobs:
           --enable-protocol=hls \
           --disable-shared \
           --enable-static \
+          --enable-cross-compile \
           --disable-debug \
           --disable-doc \
           --cc=$HOME/musl-cross/bin/x86_64-linux-musl-gcc
