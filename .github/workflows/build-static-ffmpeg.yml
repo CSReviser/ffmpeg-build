@@ -1,0 +1,63 @@
+name: Build Static FFmpeg (musl)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential git curl yasm nasm cmake autoconf automake libtool texinfo pkg-config zlib1g-dev
+
+      - name: Build musl-cross
+        run: |
+          git clone https://github.com/richfelker/musl-cross-make.git
+          cd musl-cross-make
+          echo -e "TARGET = x86_64-linux-musl\nOUTPUT = $HOME/musl-cross" > config.mak
+          make -j$(nproc)
+          make install
+
+      - name: Build libmp3lame (static)
+        run: |
+          wget https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz
+          tar xf lame-3.100.tar.gz
+          cd lame-3.100
+          ./configure --host=x86_64-linux-musl --disable-shared --enable-static \
+                      --prefix=$HOME/deps/lame --disable-frontend CC=$HOME/musl-cross/bin/x86_64-linux-musl-gcc
+          make -j$(nproc)
+          make install
+
+      - name: Build FFmpeg (static with musl)
+        run: |
+          git clone https://github.com/FFmpeg/FFmpeg.git
+          cd FFmpeg
+          ./configure \
+            --prefix=$HOME/ffmpeg-musl \
+            --pkg-config-flags="--static" \
+            --extra-cflags="-I$HOME/deps/lame/include" \
+            --extra-ldflags="-L$HOME/deps/lame/lib" \
+            --enable-gpl \
+            --enable-nonfree \
+            --enable-libmp3lame \
+            --enable-protocol=https \
+            --enable-protocol=hls \
+            --disable-shared \
+            --enable-static \
+            --disable-debug \
+            --disable-doc \
+            --cc=$HOME/musl-cross/bin/x86_64-linux-musl-gcc
+          make -j$(nproc)
+          make install
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-static-musl
+          path: $HOME/ffmpeg-musl/bin/ffmpeg
