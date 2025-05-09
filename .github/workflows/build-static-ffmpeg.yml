@@ -1,4 +1,4 @@
-name: Build Static FFmpeg (musl)
+name: Build static FFmpeg (glibc)
 
 on:
   workflow_dispatch:
@@ -7,82 +7,72 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
+    env:
+      PREFIX: ${{ github.workspace }}/ffmpeg-static
+      DEPS: ${{ github.workspace }}/deps
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y build-essential curl git \
-          yasm pkg-config zlib1g-dev
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            yasm pkg-config build-essential \
+            autoconf automake libtool \
+            zlib1g-dev curl
 
-    - name: Install musl-cross-make
-      run: |
-        git clone https://github.com/richfelker/musl-cross-make
-        cd musl-cross-make
-        echo "TARGET = x86_64-linux-musl" >> config.mak
-        echo "OUTPUT = $HOME/musl-cross" >> config.mak
-        make -j$(nproc)
-        make install
-        ls -lh $HOME/musl-cross/bin/
-        file $HOME/musl-cross/bin/x86_64-linux-musl-gcc || echo "コンパイラが存在しません"
-        chmod +x $HOME/musl-cross/bin/x86_64-linux-musl-gcc || true
+      - name: Prepare directories
+        run: |
+          mkdir -p "$DEPS" "$PREFIX"
 
-    - name: Build libmp3lame
-      run: |
-        mkdir -p $HOME/deps
-        cd $HOME/deps
-        curl -LO https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz
-        tar xzf lame-3.100.tar.gz
-        cd lame-3.100
-        CC=$HOME/musl-cross/bin/x86_64-linux-musl-gcc \
-        ./configure --prefix=$HOME/deps/lame --disable-shared --enable-static --host=x86_64-linux-musl
-        make -j$(nproc)
-        make install
+      - name: Build libmp3lame
+        run: |
+          cd "$DEPS"
+          curl -LO https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz
+          tar xzf lame-3.100.tar.gz
+          cd lame-3.100
+          ./configure --prefix="$DEPS/lame" --enable-nasm --disable-shared --enable-static
+          make -j$(nproc)
+          make install
 
-    - name: Build OpenSSL
-      run: |
-        cd $HOME/deps
-        curl -LO https://www.openssl.org/source/openssl-3.3.0.tar.gz
-        tar xzf openssl-3.3.0.tar.gz
-        cd openssl-3.3.0
-        ./Configure linux-x86_64 no-shared no-zlib no-dso no-asm --prefix=$HOME/deps/openssl --openssldir=$HOME/deps/openssl
-        make CC=$HOME/musl-cross/bin/x86_64-linux-musl-gcc -j$(nproc)
-        make install_sw
+      - name: Build OpenSSL
+        run: |
+          cd "$DEPS"
+          curl -LO https://www.openssl.org/source/openssl-1.1.1w.tar.gz
+          tar xzf openssl-1.1.1w.tar.gz
+          cd openssl-1.1.1w
+          ./Configure linux-x86_64 no-shared --prefix="$DEPS/openssl"
+          make -j$(nproc)
+          make install_sw
 
-    - name: Build FFmpeg (static with musl)
-      run: |
-        export CC=$HOME/musl-cross/bin/x86_64-linux-musl-gcc
-        export PKG_CONFIG_PATH="$HOME/deps/openssl/lib/pkgconfig"
-        git clone https://github.com/FFmpeg/FFmpeg.git
-        cd FFmpeg
-        ./configure \
-          --prefix=$HOME/ffmpeg-musl \
-          --pkg-config-flags="--static" \
-          --extra-cflags="-I$HOME/deps/lame/include -I$HOME/deps/openssl/include" \
-          --extra-ldflags="-L$HOME/deps/lame/lib -L$HOME/deps/openssl/lib -static" \
-          --extra-libs="-lssl -lcrypto -lz" \
-          --enable-gpl \
-          --enable-nonfree \
-          --enable-libmp3lame \
-          --enable-openssl \
-          --enable-protocol=https \
-          --enable-protocol=hls \
-          --disable-shared \
-          --enable-static \
-          --enable-cross-compile \
-          --disable-debug \
-          --disable-doc \
-          --cc=$CC \
-          --enable-cross-compile \
-          --target-os=linux \
-          --arch=x86_64
-        make -j$(nproc)
-        make install
+      - name: Build FFmpeg
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git clone https://github.com/FFmpeg/FFmpeg.git
+          cd FFmpeg
+          ./configure \
+            --prefix="$PREFIX" \
+            --pkg-config-flags="--static" \
+            --extra-cflags="-I$DEPS/lame/include -I$DEPS/openssl/include" \
+            --extra-ldflags="-L$DEPS/lame/lib -L$DEPS/openssl/lib -static" \
+            --extra-libs="-lssl -lcrypto -lz" \
+            --enable-gpl \
+            --enable-nonfree \
+            --enable-libmp3lame \
+            --enable-openssl \
+            --enable-protocol=https \
+            --enable-protocol=hls \
+            --disable-shared \
+            --enable-static \
+            --disable-debug \
+            --disable-doc
+          make -j$(nproc)
+          make install
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ffmpeg-musl-static
-        path: ${{ runner.home }}/ffmpeg-musl/bin/ffmpeg
+      - name: Upload FFmpeg binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-static
+          path: ${{ env.PREFIX }}/bin/ffmpeg
