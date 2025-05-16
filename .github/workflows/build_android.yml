@@ -16,4 +16,4 @@ jobs:
       - name: Build and push Docker image
         run: |
           docker build -f Dockerfile.android -t ghcr.io/csreviser/ffmpeg-android:latest .
-          docker push -f Dockerfile.android ghcr.io/csreviser/ffmpeg-android:latest
+          docker push ghcr.io/csreviser/ffmpeg-android:latest
