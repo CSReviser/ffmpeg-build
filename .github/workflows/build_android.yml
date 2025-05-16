@@ -15,5 +15,5 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Build and push Docker image
         run: |
-          docker build -f Dockerfile.android -t ghcr.io/CSReviser/ffmpeg-android:latest .
-          docker push -fDockerfile.android ghcr.io/CSReviser/ffmpeg-android:latest
+          docker build -f Dockerfile.android -t ghcr.io/csreviser/ffmpeg-android:latest .
+          docker push -fDockerfile.android ghcr.io/csreviser/ffmpeg-android:latest
