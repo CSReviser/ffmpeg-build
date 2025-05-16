@@ -1,0 +1,18 @@
+FROM ubuntu:22.04
+
+ENV ANDROID_NDK_HOME=/opt/android-ndk
+ENV PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+
+RUN apt update && apt install -y curl git unzip build-essential
+
+# Install Android NDK
+RUN curl -LO https://dl.google.com/android/repository/android-ndk-r26d-linux.zip \
+    && unzip android-ndk-r26d-linux.zip -d /opt \
+    && mv /opt/android-ndk-r26d /opt/android-ndk
+
+# Clone and build FFmpeg
+WORKDIR /build
+COPY build-ffmpeg.sh .
+RUN chmod +x build-ffmpeg.sh && ./build-ffmpeg.sh
+
+# Optional: Copy to /out for artifacts
