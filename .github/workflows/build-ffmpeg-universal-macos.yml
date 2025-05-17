@@ -1,0 +1,95 @@
+name: Build FFmpeg (macOS Universal Static)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ffmpeg-universal:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [arm64, x86_64]
+
+    env:
+      OPENSSL_ROOT: /usr/local/opt/openssl@3
+      LAME_ROOT: /usr/local
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          brew install pkg-config automake autoconf libtool \
+                       lame openssl@3
+
+      - name: Set up environment variables
+        run: |
+          echo "PKG_CONFIG_PATH=$OPENSSL_ROOT/lib/pkgconfig" >> $GITHUB_ENV
+
+      - name: Download FFmpeg
+        run: |
+          curl -LO https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2
+          tar xjf ffmpeg-snapshot.tar.bz2
+          mv ffmpeg* ffmpeg
+
+      - name: Configure and build FFmpeg for ${{ matrix.arch }}
+        run: |
+          cd ffmpeg
+          export ARCH=${{ matrix.arch }}
+          export TARGET_DIR=$HOME/ffmpeg-build-$ARCH
+          export CFLAGS="-arch $ARCH"
+          export LDFLAGS="-arch $ARCH"
+
+          ./configure \
+            --prefix=$TARGET_DIR \
+            --cc="clang" \
+            --pkg-config-flags="--static" \
+            --extra-cflags="$CFLAGS -I$OPENSSL_ROOT/include" \
+            --extra-ldflags="$LDFLAGS -L$OPENSSL_ROOT/lib" \
+            --enable-static \
+            --disable-shared \
+            --disable-debug \
+            --disable-doc \
+            --enable-gpl \
+            --enable-nonfree \
+            --enable-openssl \
+            --enable-libmp3lame \
+            --enable-protocol=https \
+            --enable-demuxer=hls \
+            --enable-muxer=hls
+
+          make -j$(sysctl -n hw.ncpu)
+          make install
+
+      - name: Upload per-arch binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-${{ matrix.arch }}
+          path: ~/ffmpeg-build-${{ matrix.arch }}/bin/ffmpeg
+
+  merge-universal:
+    needs: build-ffmpeg-universal
+    runs-on: macos-latest
+    steps:
+      - name: Download both binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ffmpeg-*
+          merge-multiple: true
+
+      - name: Merge into Universal Binary
+        run: |
+          mkdir -p universal
+          lipo -create ffmpeg-arm64 ffmpeg-x86_64 -output universal/ffmpeg
+          chmod +x universal/ffmpeg
+
+      - name: Archive Universal Binary
+        run: |
+          tar -czf ffmpeg-macos-universal.tar.gz -C universal ffmpeg
+
+      - name: Upload final artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-macos-universal
+          path: ffmpeg-macos-universal.tar.gz
