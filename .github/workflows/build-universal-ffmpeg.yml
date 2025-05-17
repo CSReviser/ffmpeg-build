@@ -1,0 +1,48 @@
+name: Create Universal FFmpeg for macOS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-universal-ffmpeg:
+    runs-on: macos-latest
+
+    steps:
+      - name: Set up tools
+        run: |
+          brew install p7zip
+
+      - name: Download FFmpeg ARM (Apple Silicon)
+        run: |
+          curl -L -o ffmpeg-arm.zip https://www.osxexperts.net/ffmpeg711arm.zip
+          unzip ffmpeg-arm.zip -d arm
+          mv arm/ffmpeg ffmpeg-arm
+          chmod +x ffmpeg-arm
+
+      - name: Download FFmpeg Intel (x86_64)
+        run: |
+          curl -L -o ffmpeg-intel.7z https://evermeet.cx/ffmpeg/ffmpeg-7.1.1.7z
+          7z x ffmpeg-intel.7z -offmpeg-intel
+          mv ffmpeg-intel/ffmpeg ffmpeg-x86_64
+          chmod +x ffmpeg-x86_64
+
+      - name: Verify architectures
+        run: |
+          lipo -info ffmpeg-arm
+          lipo -info ffmpeg-x86_64
+
+      - name: Create Universal Binary
+        run: |
+          lipo -create ffmpeg-arm ffmpeg-x86_64 -output ffmpeg-universal
+          chmod +x ffmpeg-universal
+          lipo -info ffmpeg-universal
+
+      - name: Archive universal binary
+        run: |
+          tar -czf ffmpeg-macos-universal.tar.gz ffmpeg-universal
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-macos-universal
+          path: ffmpeg-macos-universal.tar.gz
