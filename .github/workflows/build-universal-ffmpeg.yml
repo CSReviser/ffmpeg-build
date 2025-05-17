@@ -33,13 +33,13 @@ jobs:
 
       - name: Create Universal Binary
         run: |
-          lipo -create ffmpeg-arm ffmpeg-x86_64 -output ffmpeg-universal
-          chmod +x ffmpeg-universal
-          lipo -info ffmpeg-universal
+          lipo -create ffmpeg-arm ffmpeg-x86_64 -output ffmpeg
+          chmod +x ffmpeg
+          lipo -info ffmpeg
 
       - name: Archive universal binary
         run: |
-          tar -czf ffmpeg-macos-universal.tar.gz ffmpeg-universal
+          tar -czf ffmpeg-macos-universal.tar.gz ffmpeg
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
