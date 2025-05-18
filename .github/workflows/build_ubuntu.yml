@@ -1,4 +1,4 @@
-name: Build FFmpeg Static
+name: Build FFmpeg ubuntu Static
 
 on:
   workflow_dispatch:
