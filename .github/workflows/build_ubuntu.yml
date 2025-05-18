@@ -19,7 +19,7 @@ jobs:
         run: |
           git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg
           cd ffmpeg
-          git checkout tag/n7.1.1
+          git checkout tags/n7.1.1
           ./configure \
             --prefix=$HOME/ffmpeg-static \
             --pkg-config-flags="--static" \
