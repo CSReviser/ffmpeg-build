@@ -17,9 +17,9 @@ jobs:
 
       - name: Clone FFmpeg
         run: |
-          git clone --depth=1 https://github.com/FFmpeg/FFmpeg.git ffmpeg
+          git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg
           cd ffmpeg
-          git checkout 68af2cc
+          git checkout db69d06
           ./configure \
             --prefix=$HOME/ffmpeg-static \
             --pkg-config-flags="--static" \
