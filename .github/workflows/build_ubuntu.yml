@@ -13,7 +13,7 @@ jobs:
           sudo apt install -y \
             autoconf automake build-essential cmake libtool git \
             pkg-config texinfo nasm yasm \
-            libssl-dev libmp3lame-dev zlib1g-dev
+            libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev
 
       - name: Clone FFmpeg
         run: |
@@ -28,6 +28,8 @@ jobs:
             --enable-gpl \
             --enable-nonfree \
             --enable-libmp3lame \
+            --enable-libfdk-aac \
+            --enable-encoder=png,jpeg \
             --enable-openssl \
             --enable-protocol=https \
             --enable-protocol=hls \
@@ -42,4 +44,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ffmpeg-static
-          path: ~/ffmpeg-static
+          path: ~/ffmpeg-static/bin
