@@ -39,6 +39,7 @@ jobs:
             --disable-doc
           make -j$(nproc)
           make install
+          ffmpeg -version
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
