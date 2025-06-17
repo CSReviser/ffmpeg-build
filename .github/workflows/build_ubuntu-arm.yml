@@ -1,4 +1,4 @@
-name: Build FFmpeg ubuntu Static
+name: arn FFmpeg ubuntu Static
 
 on:
   workflow_dispatch:
