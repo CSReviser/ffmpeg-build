@@ -14,14 +14,14 @@ jobs:
 
       - name: Download FFmpeg ARM (Apple Silicon)
         run: |
-          wget -qO ffmpeg-arm.zip https://www.osxexperts.net/ffmpeg711arm.zip || { echo "Failed to download arm FFmpeg"; exit 1; }
+          wget -qO ffmpeg-arm.zip hhttps://www.osxexperts.net/ffmpeg80arm.zip || { echo "Failed to download arm FFmpeg"; exit 1; }
           unzip ffmpeg-arm.zip -d arm
           mv arm/ffmpeg ffmpeg-arm
           chmod +x ffmpeg-arm
 
       - name: Download FFmpeg Intel (x86_64)
         run: |
-          wget -qO ffmpeg-intel.7z https://evermeet.cx/ffmpeg/ffmpeg-7.1.1.7z || { echo "Failed to download FFmpeg-intel"; exit 1; }
+          wget -qO ffmpeg-intel.7z https://evermeet.cx/ffmpeg/ffmpeg-8.0.7z || { echo "Failed to download FFmpeg-intel"; exit 1; }
           7z x ffmpeg-intel.7z -offmpeg-intel
           mv ffmpeg-intel/ffmpeg ffmpeg-x86_64
           chmod +x ffmpeg-x86_64
