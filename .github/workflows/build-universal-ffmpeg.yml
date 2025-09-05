@@ -14,7 +14,7 @@ jobs:
 
       - name: Download FFmpeg ARM (Apple Silicon)
         run: |
-          wget -qO ffmpeg-arm.zip hhttps://www.osxexperts.net/ffmpeg80arm.zip || { echo "Failed to download arm FFmpeg"; exit 1; }
+          wget -qO ffmpeg-arm.zip https://www.osxexperts.net/ffmpeg80arm.zip || { echo "Failed to download arm FFmpeg"; exit 1; }
           unzip ffmpeg-arm.zip -d arm
           mv arm/ffmpeg ffmpeg-arm
           chmod +x ffmpeg-arm
