@@ -19,7 +19,7 @@ jobs:
         run: |
           git clone https://github.com/openssl/openssl.git
           cd openssl
-          git checkout release/1.1.1
+          git checkout tags/openssl-3.5.2
           export CROSS_COMPILE=x86_64-w64-mingw32-
           ./Configure mingw64 no-shared --cross-compile-prefix=$CROSS_COMPILE --prefix=$HOME/openssl-win
           make -j$(nproc)
