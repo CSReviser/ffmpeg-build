@@ -59,8 +59,7 @@ jobs:
           --enable-protocol=https \
           --enable-protocol=hls \
           --enable-encoder=png,jpeg \
-          --enable-openssl \
-          --enable-libvorbis
+          --enable-openssl 
 #          --enable-libmp3lame \
 
       - name: Build FFmpeg
