@@ -1,6 +1,5 @@
 name: Build FFmpeg for Windows
 
-
 on:
   workflow_dispatch:
 
