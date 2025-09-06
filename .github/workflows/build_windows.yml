@@ -41,7 +41,7 @@ jobs:
         run: |
           git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg
           cd ffmpeg
-          git checkout release/6.0  # 任意の安定版に変更可能
+          git checkout tags/n8.0  # 任意の安定版に変更可能
 
       - name: Configure FFmpeg for Windows (x86_64)
         run: |
@@ -56,11 +56,11 @@ jobs:
           --disable-shared \
           --disable-debug \
           --disable-doc \
-          --enable-libx264 \
-          --enable-libx265 \
           --enable-libvpx \
           --enable-libopus \
           --enable-libmp3lame \
+          --enable-encoder=png,jpeg \
+          --enable-openssl \
           --enable-libvorbis
 
       - name: Build FFmpeg
