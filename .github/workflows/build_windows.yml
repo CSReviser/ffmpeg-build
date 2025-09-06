@@ -56,12 +56,12 @@ jobs:
           --disable-shared \
           --disable-debug \
           --disable-doc \
-          --enable-libvpx \
-          --enable-libopus \
-          --enable-libmp3lame \
+          --enable-protocol=https \
+          --enable-protocol=hls \
           --enable-encoder=png,jpeg \
           --enable-openssl \
           --enable-libvorbis
+#          --enable-libmp3lame \
 
       - name: Build FFmpeg
         run: |
