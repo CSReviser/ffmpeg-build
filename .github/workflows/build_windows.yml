@@ -5,99 +5,40 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04  # または ubuntu-24.04 に変更可能
+    runs-on: ubuntu-latest  # または ubuntu-24.04 に変更可能
     steps:
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y \
             autoconf automake build-essential cmake libtool git \
-            pkg-config texinfo nasm yasm \
+            pkg-config texinfo nasm yasm curl \
             libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev mingw-w64
 
 
-name: Build FFmpeg with MP3 and SSL for Windows
 
-on:
-  workflow_dispatch:
-  push:
-    branches: [main]
 
-jobs:
-  build-windows:
-    runs-on: ubuntu-latest
+      - name: Build OpenSSL for Windows
+        run: |
+          curl -O https://www.openssl.org/source/openssl-1.1.1w.tar.gz
+          tar xzf openssl-1.1.1w.tar.gz
+          cd openssl-1.1.1w
+          export CROSS_COMPILE=x86_64-w64-mingw32-
+          ./Configure mingw64 no-shared --cross-compile-prefix=$CROSS_COMPILE --prefix=$HOME/openssl-win
+          make -j$(nproc)
+          make install_sw
 
-    steps:
-    - name: Checkout source
-      uses: actions/checkout@v3
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          autoconf automake build-essential cmake git libtool pkg-config \
-          yasm nasm \
-          mingw-w64 curl
-
-    - name: Build OpenSSL for Windows
-      run: |
-        curl -O https://www.openssl.org/source/openssl-1.1.1w.tar.gz
-        tar xzf openssl-1.1.1w.tar.gz
-        cd openssl-1.1.1w
-        export CROSS_COMPILE=x86_64-w64-mingw32-
-        ./Configure mingw64 no-shared --cross-compile-prefix=$CROSS_COMPILE --prefix=$HOME/openssl-win
-        make -j$(nproc)
-        make install_sw
-
-    - name: Build LAME for Windows
-      run: |
-        git clone https://github.com/rbrito/lame.git
-        cd lame
-        ./configure \
+      - name: Build LAME for Windows
+        run: |
+          git clone https://github.com/rbrito/lame.git
+          cd lame
+          ./configure \
           --host=x86_64-w64-mingw32 \
           --disable-shared \
           --enable-static \
           --prefix=$HOME/lame-win
-        make -j$(nproc)
-        make install
-
-    - name: Clone FFmpeg
-      run: |
-        git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg
-        cd ffmpeg
-        git checkout release/6.0
-
-    - name: Configure FFmpeg with MP3 and SSL
-      run: |
-        cd ffmpeg
-        PKG_CONFIG_PATH="$HOME/lame-win/lib/pkgconfig:$HOME/openssl-win/lib/pkgconfig" \
-        ./configure \
-          --target-os=mingw32 \
-          --arch=x86_64 \
-          --cross-prefix=x86_64-w64-mingw32- \
-          --enable-gpl \
-          --enable-version3 \
-          --enable-static \
-          --disable-shared \
-          --disable-debug \
-          --disable-doc \
-          --enable-libmp3lame \
-          --enable-openssl \
-          --extra-cflags="-I$HOME/lame-win/include -I$HOME/openssl-win/include" \
-          --extra-ldflags="-L$HOME/lame-win/lib -L$HOME/openssl-win/lib"
-
-    - name: Build FFmpeg
-      run: |
-        cd ffmpeg
-        make -j$(nproc)
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: ffmpeg-windows-mp3-ssl
-        path: ffmpeg/ffmpeg.exe
-
-
+          make -j$(nproc)
+          make install
 
       - name: Clone FFmpeg
         run: |
