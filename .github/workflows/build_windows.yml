@@ -20,9 +20,9 @@ jobs:
 
       - name: Build OpenSSL for Windows
         run: |
-          curl -O https://www.openssl.org/source/openssl-1.1.1w.tar.gz
-          tar xzf openssl-1.1.1w.tar.gz
-          cd openssl-1.1.1w
+          curl -O https://github.com/openssl/openssl/releases/download/openssl-3.5.2/openssl-3.5.2.tar.gz
+          tar xzf openssl-3.5.2.tar.gz
+          cd openssl-3.5.2
           export CROSS_COMPILE=x86_64-w64-mingw32-
           ./Configure mingw64 no-shared --cross-compile-prefix=$CROSS_COMPILE --prefix=$HOME/openssl-win
           make -j$(nproc)
