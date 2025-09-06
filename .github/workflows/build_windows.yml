@@ -15,14 +15,10 @@ jobs:
             pkg-config texinfo nasm yasm curl \
             libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev mingw-w64
 
-
-
-
       - name: Build OpenSSL for Windows
         run: |
-          curl -O https://github.com/openssl/openssl/releases/download/openssl-3.5.2/openssl-3.5.2.tar.gz
-          tar xzf openssl-3.5.2.tar.gz
-          cd openssl-3.5.2
+          git clone https://github.com/openssl/openssl.git
+          cd openssl
           export CROSS_COMPILE=x86_64-w64-mingw32-
           ./Configure mingw64 no-shared --cross-compile-prefix=$CROSS_COMPILE --prefix=$HOME/openssl-win
           make -j$(nproc)
