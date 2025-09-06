@@ -1,31 +1,31 @@
 name: Build FFmpeg for Windows
 
+
 on:
   workflow_dispatch:
 
 jobs:
-  build-windows:
-    runs-on: ubuntu-latest
-
+  build:
+    runs-on: ubuntu-22.04  # または ubuntu-24.04 に変更可能
     steps:
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y \
-          autoconf automake build-essential cmake git libtool pkg-config \
-          yasm nasm \
-          mingw-w64
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            autoconf automake build-essential cmake libtool git \
+            pkg-config texinfo nasm yasm \
+            libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev mingw-w64
 
-    - name: Clone FFmpeg
-      run: |
-        git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg
-        cd ffmpeg
-        git checkout release/6.0  # 任意の安定版に変更可能
+      - name: Clone FFmpeg
+        run: |
+          git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg
+          cd ffmpeg
+          git checkout release/6.0  # 任意の安定版に変更可能
 
-    - name: Configure FFmpeg for Windows (x86_64)
-      run: |
-        cd ffmpeg
-        ./configure \
+      - name: Configure FFmpeg for Windows (x86_64)
+        run: |
+          cd ffmpeg
+          ./configure \
           --target-os=mingw32 \
           --arch=x86_64 \
           --cross-prefix=x86_64-w64-mingw32- \
@@ -42,13 +42,13 @@ jobs:
           --enable-libmp3lame \
           --enable-libvorbis
 
-    - name: Build FFmpeg
-      run: |
-        cd ffmpeg
-        make -j$(nproc)
+      - name: Build FFmpeg
+        run: |
+          cd ffmpeg
+          make -j$(nproc)
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: ffmpeg-windows-build
-        path: ffmpeg/ffmpeg.exe
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ffmpeg-windows-build
+          path: ffmpeg/ffmpeg.exe
