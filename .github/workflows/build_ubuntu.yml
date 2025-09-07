@@ -17,8 +17,8 @@ jobs:
 
       - name: Clone FFmpeg
         run: |
-          wget https://ffmpeg.org/releases/ffmpeg-8.0.tar.xz
-          tar -xzf ffmpeg-8.0.tar.xz
+          wget https://ffmpeg.org/releases/ffmpeg-8.0.tar.gz
+          tar -xzf ffmpeg-8.0.tar.gz
           cd ffmpeg-8.0
           ./configure \
             --prefix=$HOME/ffmpeg-static \
