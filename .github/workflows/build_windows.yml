@@ -14,11 +14,6 @@ jobs:
             autoconf automake build-essential cmake libtool git \
             pkg-config texinfo nasm yasm curl \
             libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev mingw-w64
-
-sudo apt-get update
-          sudo apt-get install -y \
-            autoconf automake build-essential cmake libtool git \
-            pkg-config texinfo nasm yasm curl \
             mingw-w64 g++-mingw-w64-x86-64 \
             libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev \
             libass-dev libbluray-dev libbs2b-dev libcaca-dev \
