@@ -26,13 +26,8 @@ jobs:
           mv ffmpeg.mk ./src/ffmpeg.mk
           make MXE_TARGETS='x86_64-w64-mingw32.static' ffmpeg -j$(nproc)
 
-      - name: Build FFmpeg
-        run: |
-          cd ffmpeg
-          make -j$(nproc)
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ffmpeg-windows-build
-          path: ffmpeg/ffmpeg.exe
+          path: mxe/usr/i686-w64-mingw32.static/bin/ffmpeg.exe
