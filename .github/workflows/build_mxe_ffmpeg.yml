@@ -30,4 +30,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ffmpeg-windows-build
-          path: mxe/usr/i686-w64-mingw32.static/bin/ffmpeg.exe
+          path: mxe/usr/x86_64-w64-mingw32.staticc/bin/ffmpeg.exe
