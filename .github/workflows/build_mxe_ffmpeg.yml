@@ -11,7 +11,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y \
-            apt-get update && apt-get install -y \
             build-essential autoconf automake autopoint \
             bash bison bzip2 ca-certificates cmake curl flex g++ g++-multilib \
             gettext git gperf intltool lzip make openssl patch perl p7zip-full python-is-python3 \
