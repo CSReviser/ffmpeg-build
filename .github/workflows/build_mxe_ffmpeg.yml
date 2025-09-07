@@ -20,8 +20,10 @@ jobs:
 
       - name: Clone FFmpeg
         run: |
-          git clone https://github.com/mxe/mxe.git 
+          git clone https://github.com/mxe/mxe.git
           cd mxe 
+          wget https://github.com/CSReviser/ffmpeg-build/blob/main/ffmpeg.mk
+          mv ffmpeg.mk ./src/ffmpeg.mk
           make MXE_TARGETS='x86_64-w64-mingw32.static' ffmpeg -j$(nproc)
 
       - name: Build FFmpeg
