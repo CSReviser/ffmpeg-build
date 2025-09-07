@@ -17,9 +17,9 @@ jobs:
 
       - name: Clone FFmpeg
         run: |
-          git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg
-          cd ffmpeg
-          git checkout tags/n8.0
+          wget https://ffmpeg.org/releases/ffmpeg-8.0.tar.gz
+          tar -xzf ffmpeg-8.0.tar.gz
+          cd ffmpeg-8.0
           ./configure \
             --prefix=$HOME/ffmpeg-static \
             --pkg-config-flags="--static" \
@@ -45,5 +45,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ffmpeg-static
+          name: ffmpeg-arm-static
           path: ~/ffmpeg-static/bin
