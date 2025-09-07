@@ -17,9 +17,9 @@ jobs:
 
       - name: Clone FFmpeg
         run: |
-          git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg
-          cd ffmpeg
-          git checkout tags/n8.0
+          wget https://ffmpeg.org/releases/ffmpeg-8.0.tar.xz
+          tar -xzf ffmpeg-8.0.tar.xz
+          cd ffmpeg-8.0
           ./configure \
             --prefix=$HOME/ffmpeg-static \
             --pkg-config-flags="--static" \
@@ -39,6 +39,10 @@ jobs:
             --disable-doc
           make -j$(nproc)
           make install
+
+#          git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg
+#          cd ffmpeg
+#          git checkout tags/n8.0
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
