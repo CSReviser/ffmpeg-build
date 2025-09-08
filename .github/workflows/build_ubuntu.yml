@@ -13,7 +13,9 @@ jobs:
           sudo apt install -y \
             autoconf automake build-essential cmake libtool git \
             pkg-config texinfo nasm yasm \
-            libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev
+            libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev \
+            python3 python3-pip
+           pip install torch openai-whisper
 
       - name: Clone FFmpeg
         run: |
