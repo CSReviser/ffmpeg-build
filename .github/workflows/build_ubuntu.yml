@@ -33,6 +33,7 @@ jobs:
             --enable-openssl \
             --enable-protocol=https \
             --enable-protocol=hls \
+            --enable-whisper \
             --disable-shared \
             --enable-static \
             --disable-debug \
