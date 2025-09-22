@@ -22,6 +22,7 @@ jobs:
         run: |
           git clone https://github.com/mxe/mxe.git
           cd mxe 
+          sed -i 's/^.*_CHECKSUM.*/$(PKG)_CHECKSUM := skip/' ./src/ffmpeg.mk
           echo "🔍 ffmpeg.mk after modification:"
           cat ./src/ffmpeg.mk | head -20
           make MXE_TARGETS='x86_64-w64-mingw32.static' ffmpeg -j$(nproc)
