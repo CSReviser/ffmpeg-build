@@ -22,11 +22,13 @@ jobs:
         run: |
           git clone https://github.com/mxe/mxe.git
           cd mxe 
-          sed -i 's/^.*_VERSION.*/$(PKG)_VERSION  := 7.1.1/' ./src/ffmpeg.mk
-          sed -i 's/^.*_CHECKSUM.*/$(PKG)_CHECKSUM := 733984395e0dbbe5c046abda2dc49a5544e7e0e1e2366bba849222ae9e3a03b1/' ./src/ffmpeg.mk
           echo "🔍 ffmpeg.mk after modification:"
           cat ./src/ffmpeg.mk | head -20
           make MXE_TARGETS='x86_64-w64-mingw32.static' ffmpeg -j$(nproc)
+
+#          sed -i 's/^.*_VERSION.*/$(PKG)_VERSION  := 7.1.1/' ./src/ffmpeg.mk
+#          sed -i 's/^.*_CHECKSUM.*/$(PKG)_CHECKSUM := 733984395e0dbbe5c046abda2dc49a5544e7e0e1e2366bba849222ae9e3a03b1/' ./src/ffmpeg.mk
+
 #          wget https://github.com/CSReviser/ffmpeg-build/blob/main/ffmpeg.mk
 #          mv ffmpeg.mk ./src/ffmpeg.mk
 
