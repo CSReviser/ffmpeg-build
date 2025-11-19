@@ -1,0 +1,29 @@
+whisper lecture.mp3 --model large-v3 --language ja --output_format srt --initial_prompt "\
+<|ja|><|en|><|transcribe|>
+
+この音声は日本語と英語が混在する語学講座です。
+先生は日本語で説明しますが、英語の例文・単語・フレーズはすべて正しい英語スペルで書き起こしてください。
+英語は決してカタカナや日本語に変換しないでください。
+$(cat ~/lecture_english_prompt.txt)"
+
+
+
+<|ja|><|en|><|transcribe|>
+
+この音声は日本語と英語が混在する語学講座です。
+先生は日本語で説明しますが、英語の例文・単語・フレーズはすべて正しい英語スペルで書き起こしてください。
+生徒の発言は英語なので、英語のまま正確に文字起こししてください。
+英語は決して日本語やカタカナに変換しないでください。
+
+【必ず英語のまま出力する単語・フレーズ】
+hello, hi, good morning, good afternoon, good evening, thank you, thanks, you're welcome, yes, no, okay, please, sorry, excuse me, I see, I understand, I don't understand, please repeat, one more time, slowly
+
+【文法・レッスン系英語】
+vocabulary, grammar, pronunciation, spelling, sentence, example, practice, listen, repeat, speak, read, write, question, answer, conversation, dialogue, exercise
+
+【その他よく出てくる英語表現】
+How are you?, I'm fine thank you and you?, Nice to meet you, See you, Take care
+
+【教材名・人名は英語表記で】
+Genki, Minna no Nihongo, English Grammar in Use, TOEIC, TOEFL
+Mr. Johnson, John, Sarah, Mike, Emma
