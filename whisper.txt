@@ -1,3 +1,11 @@
+whisper ラジオ英会話_2025_11_19.mp3 --language ja --fp16 False --initial_prompt "\
+この音声は日本語と英語が混在する語学講座です。
+先生は日本語で説明しますが、英語の例文・単語・フレーズはすべて正しい英語スペルで書き起こしてください。
+英語は決してカタカナや日本語に変換しないでください。
+ラジオ英会話 ハートでつかめ！英語の極意
+【講師】東洋学園大学教授…大西泰斗, 【出演】デイビット・エバンス, 秋乃ろーざ
+"
+
 whisper lecture.mp3 --model large-v3 --language ja --output_format srt --initial_prompt "\
 <|ja|><|en|><|transcribe|>
 
