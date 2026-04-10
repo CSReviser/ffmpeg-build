@@ -12,7 +12,8 @@ jobs:
 
     env:
       OPENSSL_ROOT: /usr/local/opt/openssl@3
-      LAME_ROOT: /usr/local
+      LAME_ROOT: $HOME/local
+      PKG_CONFIG_PATH: /usr/local/opt/openssl@3/lib/pkgconfig
 
     steps:
       - name: Checkout
@@ -29,6 +30,7 @@ jobs:
 
       - name: Build libmp3lame
         run: |
+          mkdir -p $HOME/local
           cd $HOME/local
           curl -LO https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz
           tar xzf lame-3.100.tar.gz
