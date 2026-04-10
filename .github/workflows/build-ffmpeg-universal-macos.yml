@@ -8,7 +8,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        arch: [arm64]
+        arch: [arm64, x86_64]
 #                arch: [arm64, x86_64]
 
     env:
@@ -28,6 +28,7 @@ jobs:
       - name: Set up environment variables
         run: |
           echo "PKG_CONFIG_PATH=$OPENSSL_ROOT/lib/pkgconfig" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=$LAME_ROOT/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
       - name: Build libmp3lame
         run: |
@@ -90,7 +91,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Download both binaries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           pattern: ffmpeg-*
           merge-multiple: true
@@ -106,7 +107,7 @@ jobs:
           tar -czf ffmpeg-macos-universal.tar.gz -C universal ffmpeg
 
       - name: Upload final artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ffmpeg-macos-universal
           path: ffmpeg-macos-universal.tar.gz
