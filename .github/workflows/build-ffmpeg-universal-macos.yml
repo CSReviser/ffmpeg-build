@@ -52,13 +52,15 @@ jobs:
           export TARGET_DIR=$HOME/ffmpeg-build-$ARCH
           export CFLAGS="-arch $ARCH"
           export LDFLAGS="-arch $ARCH"
+          export PKG_CONFIG_PATH="$LAME_ROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
+
 
           ./configure \
             --prefix=$TARGET_DIR \
             --cc="clang" \
             --pkg-config-flags="--static" \
-            --extra-cflags="$CFLAGS -I$OPENSSL_ROOT/include" \
-            --extra-ldflags="$LDFLAGS -L$OPENSSL_ROOT/lib" \
+            --extra-cflags="$CFLAGS -I$OPENSSL_ROOT/include" -I$LAME_ROOT/include" \
+            --extra-ldflags="$LDFLAGS -L$OPENSSL_ROOT/lib" -I$LAME_ROOT/include" \
             --enable-static \
             --disable-shared \
             --disable-debug \
