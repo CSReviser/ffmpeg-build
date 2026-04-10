@@ -43,11 +43,14 @@ jobs:
         run: |
           curl -LO https://ffmpeg.org/releases/ffmpeg-8.1.tar.xz
           tar xjf ffmpeg-8.1.tar.xz
+          ls -R /Users/runner/work/ffmpeg-build/ffmpeg-build/local
+
 #          mv ffmpeg* ffmpeg
 
       - name: Configure and build FFmpeg for ${{ matrix.arch }}
         run: |
           cd ffmpeg-8.1
+          ls -R /Users/runner/work/ffmpeg-build/ffmpeg-build/local
           export ARCH=${{ matrix.arch }}
           export TARGET_DIR=$HOME/ffmpeg-build-$ARCH
           export CFLAGS="-arch $ARCH"
