@@ -52,6 +52,7 @@ jobs:
           export TARGET_DIR=$HOME/ffmpeg-build-$ARCH
           export CFLAGS="-arch $ARCH"
           export LDFLAGS="-arch $ARCH"
+          export PKG_CONFIG_PATH="$LAME_ROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
 
           ./configure \
             --prefix=$TARGET_DIR \
