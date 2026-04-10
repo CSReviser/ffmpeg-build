@@ -35,7 +35,7 @@ jobs:
           curl -LO https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz
           tar xzf lame-3.100.tar.gz
           cd lame-3.100
-          ./configure --prefix="$HOME/local/lame" --enable-nasm --disable-shared --enable-static
+          ./configure --prefix="$LAME_ROOT" --disable-shared --enable-static
           make -j$(nproc)
           make install
 
