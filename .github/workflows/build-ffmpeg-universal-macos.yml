@@ -63,8 +63,8 @@ jobs:
             --prefix=$TARGET_DIR \
             --cc="clang" \
             --pkg-config-flags="--static" \
-            --extra-cflags="$CFLAGS -I$OPENSSL_ROOT/include" \
-            --extra-ldflags="$LDFLAGS -L$OPENSSL_ROOT/lib" \
+            --extra-cflags="$CFLAGS -I$LAME_ROOT/include -I$OPENSSL_ROOT/include" \
+            --extra-ldflags="$LDFLAGS -L$LAME_ROOT/lib -L$OPENSSL_ROOT/lib" \
             --enable-static \
             --disable-shared \
             --disable-debug \
