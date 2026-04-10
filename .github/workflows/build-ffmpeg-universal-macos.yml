@@ -35,7 +35,7 @@ jobs:
 
       - name: Configure and build FFmpeg for ${{ matrix.arch }}
         run: |
-          cd ffmpeg
+          cd ffmpeg-8.1
           export ARCH=${{ matrix.arch }}
           export TARGET_DIR=$HOME/ffmpeg-build-$ARCH
           export CFLAGS="-arch $ARCH"
