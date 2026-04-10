@@ -8,7 +8,8 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        arch: [arm64, x86_64]
+        arch: [arm64]
+#                arch: [arm64, x86_64]
 
     env:
       OPENSSL_ROOT: /usr/local/opt/openssl@3
