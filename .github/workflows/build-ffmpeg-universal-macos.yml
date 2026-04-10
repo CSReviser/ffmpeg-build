@@ -31,7 +31,7 @@ jobs:
         run: |
           curl -LO https://ffmpeg.org/releases/ffmpeg-8.1.tar.xz
           tar xjf ffmpeg-8.1.tar.xz
-          mv ffmpeg* ffmpeg
+#          mv ffmpeg* ffmpeg
 
       - name: Configure and build FFmpeg for ${{ matrix.arch }}
         run: |
