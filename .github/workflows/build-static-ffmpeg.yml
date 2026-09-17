@@ -52,7 +52,7 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           git clone https://github.com/FFmpeg/FFmpeg.git
           cd FFmpeg
-          git checkout tags/n8.1
+          git checkout tags/n9.0
           ./configure \
             --prefix="$PREFIX" \
             --pkg-config-flags="--static" \
