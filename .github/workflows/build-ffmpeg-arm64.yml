@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-ffmpeg-arm64:
-    # macos-latest is currently an Apple Silicon / arm64 runner.
+    # macos-latest is currently an Apple Silicon runner.
     runs-on: macos-latest
 
     env:
@@ -28,12 +28,18 @@ jobs:
           echo "OPENSSL_ROOT=$OPENSSL_ROOT" >> "$GITHUB_ENV"
           echo "PKG_CONFIG_PATH=$LAME_ROOT/lib/pkgconfig:$OPENSSL_ROOT/lib/pkgconfig" >> "$GITHUB_ENV"
 
-          echo "Architecture: $(uname -m)"
-          echo "OpenSSL: $OPENSSL_ROOT"
-
-      - name: Verify arm64 runner
+      - name: Verify runner architecture
         run: |
+          echo "Runner architecture:"
+          uname -m
+
           test "$(uname -m)" = "arm64"
+
+      - name: Verify toolchain
+        run: |
+          clang --version
+          pkg-config --version
+          brew --prefix openssl@3
 
       - name: Build libmp3lame
         run: |
@@ -63,22 +69,40 @@ jobs:
 
           file "$LAME_ROOT/lib/libmp3lame.a"
 
+      - name: Check pkg-config dependencies
+        run: |
+          echo "=== pkg-config search path ==="
+          echo "$PKG_CONFIG_PATH"
+
+          echo "=== libmp3lame ==="
+          pkg-config --static --libs libmp3lame
+
+          echo "=== openssl ==="
+          pkg-config --libs openssl || true
+
+          echo "=== XCB check ==="
+          if pkg-config --exists xcb; then
+            echo "WARNING: xcb is available through pkg-config."
+          else
+            echo "OK: xcb is not available through pkg-config."
+          fi
+
       - name: Download FFmpeg
         run: |
-          curl -fL -o ffmpeg-9.0.1.tar.xz \
-            https://ffmpeg.org/releases/ffmpeg-9.0.1.tar.xz
+          curl -fL -o ffmpeg-8.1.tar.xz \
+            https://ffmpeg.org/releases/ffmpeg-8.1.tar.xz
 
-          tar -xJf ffmpeg-9.0.1.tar.xz
+          tar -xJf ffmpeg-8.1.tar.xz
 
       - name: Configure FFmpeg
         run: |
-          cd ffmpeg-9.0.1
+          cd ffmpeg-8.1
 
           TARGET_DIR="$HOME/ffmpeg-build-arm64"
 
           ./configure \
             --prefix="$TARGET_DIR" \
-            --cc=clang \
+            --cc=/usr/bin/clang \
             --arch=arm64 \
             --pkg-config-flags="--static" \
             --extra-cflags="-arch arm64 -I$LAME_ROOT/include -I$OPENSSL_ROOT/include" \
@@ -93,36 +117,74 @@ jobs:
             --enable-libmp3lame \
             --enable-protocol=https \
             --enable-demuxer=hls \
-            --enable-muxer=hls
+            --enable-muxer=hls \
+            --disable-indev=x11grab_xcb \
+            --disable-indev=x11grab
+
+      - name: Show FFmpeg configuration
+        run: |
+          cd ffmpeg-8.1
+
+          echo "=== config.log summary ==="
+          grep -E '^(ARCH|CC|CFLAGS|LDFLAGS|CONFIG_|enabled|disabled)' config.log \
+            | head -200 || true
+
+          echo "=== FFmpeg configuration ==="
+          grep '^config=' ffbuild/config.mak || true
 
       - name: Build FFmpeg
         run: |
-          cd ffmpeg-9.0.1
+          cd ffmpeg-8.1
 
           make -j"$(sysctl -n hw.ncpu)"
           make install
 
-      - name: Verify FFmpeg
+      - name: Verify FFmpeg architecture
         run: |
           FFMPEG="$HOME/ffmpeg-build-arm64/bin/ffmpeg"
 
           test -x "$FFMPEG"
 
-          echo "=== Architecture ==="
+          echo "=== file ==="
           file "$FFMPEG"
 
-          echo "=== FFmpeg configuration ==="
+          echo "=== architecture check ==="
+          file "$FFMPEG" | grep -E 'arm64|ARM64'
+
+      - name: Check dynamic libraries
+        run: |
+          FFMPEG="$HOME/ffmpeg-build-arm64/bin/ffmpeg"
+
+          echo "=== otool -L ==="
+          otool -L "$FFMPEG"
+
+          echo
+          echo "=== Check for unwanted Homebrew dependencies ==="
+
+          if otool -L "$FFMPEG" | grep -E '/opt/homebrew/opt/(libxcb|xcb|xorg|x11)/'; then
+            echo
+            echo "ERROR: FFmpeg has an unwanted Homebrew X11/XCB dependency."
+            exit 1
+          fi
+
+      - name: Verify FFmpeg functionality
+        run: |
+          FFMPEG="$HOME/ffmpeg-build-arm64/bin/ffmpeg"
+
+          echo "=== version ==="
           "$FFMPEG" -version
 
-          echo "=== libmp3lame ==="
-          "$FFMPEG" -hide_banner -encoders | grep -i mp3
+          echo "=== MP3 encoder ==="
+          "$FFMPEG" -hide_banner -encoders | grep -E 'libmp3lame'
 
-          echo "=== HTTPS ==="
-          "$FFMPEG" -hide_banner -protocols | grep -E '(^| )https( |$)'
+          echo "=== HTTPS protocol ==="
+          "$FFMPEG" -hide_banner -protocols | grep -E '^  https$'
 
-          echo "=== HLS ==="
-          "$FFMPEG" -hide_banner -demuxers | grep -E ' hls'
-          "$FFMPEG" -hide_banner -muxers | grep -E ' hls'
+          echo "=== HLS demuxer ==="
+          "$FFMPEG" -hide_banner -demuxers | grep -E ' hls '
+
+          echo "=== HLS muxer ==="
+          "$FFMPEG" -hide_banner -muxers | grep -E ' hls '
 
       - name: Archive arm64 binary
         run: |
@@ -134,9 +196,9 @@ jobs:
           chmod +x package/ffmpeg
 
           tar -czf ffmpeg-macos-arm64.tar.gz \
-            -C package ffmpeg
+             -C package ffmpeg
 
-      - name: Upload arm64 binary
+      - name: Upload arm64 artifact
         uses: actions/upload-artifact@v4
         with:
           name: ffmpeg-macos-arm64
