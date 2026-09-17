@@ -1,161 +1,214 @@
-name: Build FFmpeg (macOS arm64 Static)
+name: Build FFmpeg (macOS arm64, self-contained)
+
 on:
   workflow_dispatch:
+
 jobs:
   build-ffmpeg-arm64:
-    runs-on: macos-latest
+    # GitHub-hosted Apple Silicon runner
+    runs-on: macos-14
+
     env:
-      ARCH: arm64
-      LAME_ROOT: ${{ github.workspace }}/local
+      FFMPEG_VERSION: "8.1"
+      LAME_VERSION: "3.100"
+      # Fixed source release. Update this deliberately when updating OpenSSL.
+      OPENSSL_VERSION: "3.0.18"
+
+      PREFIX: ${{ github.workspace }}/prefix
+      LAME_ROOT: ${{ github.workspace }}/prefix/lame
+      OPENSSL_ROOT: ${{ github.workspace }}/prefix/openssl
+      TARGET_DIR: ${{ github.workspace }}/package-root
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install Dependencies
+
+      - name: Verify Apple Silicon runner
+        shell: bash
         run: |
-          brew update
-          brew install pkg-config automake autoconf libtool openssl@3
-      - name: Set up environment
-        run: |
-          OPENSSL_ROOT="$(brew --prefix openssl@3)"
-          echo "OPENSSL_ROOT=$OPENSSL_ROOT" >> "$GITHUB_ENV"
-          # Do not add LAME to PKG_CONFIG_PATH.
-          # LAME 3.100 may not install libmp3lame.pc.
-          echo "PKG_CONFIG_PATH=$OPENSSL_ROOT/lib/pkgconfig" >> "$GITHUB_ENV"
-      - name: Verify runner architecture
-        run: |
-          echo "=== Runner architecture ==="
+          set -euo pipefail
           uname -m
           test "$(uname -m)" = "arm64"
-      - name: Verify toolchain
+
+      - name: Download source archives
+        shell: bash
         run: |
-          echo "=== clang ==="
-          clang --version
-          echo "=== pkg-config ==="
-          pkg-config --version
-          echo "=== OpenSSL ==="
-          echo "$OPENSSL_ROOT"
-          test -d "$OPENSSL_ROOT"
-      - name: Build libmp3lame
+          set -euo pipefail
+
+          mkdir -p "$GITHUB_WORKSPACE/src"
+          cd "$GITHUB_WORKSPACE/src"
+
+          curl -fL -o "ffmpeg-${FFMPEG_VERSION}.tar.xz" \
+            "https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.xz"
+
+          curl -fL -o "lame-${LAME_VERSION}.tar.gz" \
+            "https://downloads.sourceforge.net/project/lame/lame/${LAME_VERSION}/lame-${LAME_VERSION}.tar.gz"
+
+          curl -fL -o "openssl-${OPENSSL_VERSION}.tar.gz" \
+            "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
+
+          tar -xJf "ffmpeg-${FFMPEG_VERSION}.tar.xz"
+          tar -xzf "lame-${LAME_VERSION}.tar.gz"
+          tar -xzf "openssl-${OPENSSL_VERSION}.tar.gz"
+
+      - name: Build static OpenSSL
+        shell: bash
         run: |
-          mkdir -p "$LAME_ROOT/src"
-          cd "$LAME_ROOT/src"
-          curl -fL -o lame-3.100.tar.gz \
-            https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz
-          tar -xzf lame-3.100.tar.gz
-          cd lame-3.100
+          set -euo pipefail
+
+          cd "$GITHUB_WORKSPACE/src/openssl-${OPENSSL_VERSION}"
+
+          # no-shared prevents libssl.dylib/libcrypto.dylib from being produced.
+          ./Configure darwin64-arm64-cc \
+            no-shared \
+            no-module \
+            no-tests \
+            no-zlib \
+            --prefix="$OPENSSL_ROOT" \
+            --openssldir="$OPENSSL_ROOT/ssl"
+
+          make -j"$(sysctl -n hw.ncpu)"
+          make install_sw
+
+          test -f "$OPENSSL_ROOT/lib/libssl.a"
+          test -f "$OPENSSL_ROOT/lib/libcrypto.a"
+
+      - name: Build static LAME
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cd "$GITHUB_WORKSPACE/src/lame-${LAME_VERSION}"
+
           ./configure \
             --prefix="$LAME_ROOT" \
             --disable-shared \
             --enable-static \
             --disable-nasm
+
           make -j"$(sysctl -n hw.ncpu)"
           make install
-      - name: Verify libmp3lame
-        run: |
-          echo "=== LAME files ==="
+
           test -f "$LAME_ROOT/lib/libmp3lame.a"
           test -f "$LAME_ROOT/include/lame/lame.h"
-          ls -lh "$LAME_ROOT/lib/libmp3lame.a"
-          ls -lh "$LAME_ROOT/include/lame/lame.h"
-          echo "=== LAME library architecture ==="
+
           file "$LAME_ROOT/lib/libmp3lame.a"
-      - name: Verify OpenSSL pkg-config
-        run: |
-          echo "=== PKG_CONFIG_PATH ==="
-          echo "$PKG_CONFIG_PATH"
-          echo "=== OpenSSL pkg-config ==="
-          pkg-config --modversion openssl
-          pkg-config --libs openssl
-      - name: Download FFmpeg
-        run: |
-          curl -fL -o ffmpeg-8.1.tar.xz \
-            https://ffmpeg.org/releases/ffmpeg-8.1.tar.xz
-          tar -xJf ffmpeg-8.1.tar.xz
+
       - name: Configure FFmpeg
+        shell: bash
         run: |
-          cd ffmpeg-8.1
-          TARGET_DIR="$HOME/ffmpeg-build-arm64"
+          set -euo pipefail
+
+          cd "$GITHUB_WORKSPACE/src/ffmpeg-${FFMPEG_VERSION}"
+
+          # Do not use LAME's .pc file. /usr/bin/false makes configure use
+          # its direct header/library checks for both LAME and OpenSSL.
           ./configure \
             --prefix="$TARGET_DIR" \
             --cc=/usr/bin/clang \
             --arch=arm64 \
-            --pkg-config-flags="--static" \
+            --pkg-config=/usr/bin/false \
             --extra-cflags="-arch arm64 -I$LAME_ROOT/include -I$OPENSSL_ROOT/include" \
             --extra-ldflags="-arch arm64 -L$LAME_ROOT/lib -L$OPENSSL_ROOT/lib" \
-            --enable-static \
+            --extra-libs="$OPENSSL_ROOT/lib/libssl.a $OPENSSL_ROOT/lib/libcrypto.a" \
             --disable-shared \
             --disable-debug \
             --disable-doc \
             --enable-gpl \
-            --enable-nonfree \
+            --enable-version3 \
             --enable-openssl \
             --enable-libmp3lame \
             --enable-protocol=https \
             --enable-demuxer=hls \
             --enable-muxer=hls \
-            --disable-indev=x11grab_xcb \
-            --disable-indev=x11grab
-      - name: Show FFmpeg configuration
+            --disable-xlib \
+            --disable-libxcb \
+            --disable-libxcb-shm \
+            --disable-libxcb-shape \
+            --disable-libxcb-xfixes \
+            --disable-indev=xcbgrab
+
+      - name: Verify disabled X11 and XCB configuration
+        shell: bash
         run: |
-          cd ffmpeg-8.1
-          echo "=== FFmpeg config ==="
-          grep -E '^(CONFIG_|ARCH=|CC=|CFLAGS=|LDFLAGS=)' \
-            ffbuild/config.mak \
-            | head -200 || true
-      - name: Build FFmpeg
-        run: |
-          cd ffmpeg-8.1
-          make -j"$(sysctl -n hw.ncpu)"
-          make install
-      - name: Verify FFmpeg architecture
-        run: |
-          FFMPEG="$HOME/ffmpeg-build-arm64/bin/ffmpeg"
-          test -x "$FFMPEG"
-          echo "=== file ==="
-          file "$FFMPEG"
-          echo "=== architecture ==="
-          file "$FFMPEG" | grep -E 'arm64|ARM64'
-      - name: Check dynamic libraries
-        run: |
-          FFMPEG="$HOME/ffmpeg-build-arm64/bin/ffmpeg"
-          echo "=== otool -L ==="
-          otool -L "$FFMPEG"
-          echo
-          echo "=== Check for unwanted X11/XCB dependencies ==="
-          if otool -L "$FFMPEG" | grep -Ei \
-            '/opt/homebrew/opt/(libxcb|xcb|xorg|x11)/'; then
-            echo
-            echo "ERROR: FFmpeg has an unwanted X11/XCB dependency."
+          set -euo pipefail
+
+          cd "$GITHUB_WORKSPACE/src/ffmpeg-${FFMPEG_VERSION}"
+
+          grep -E \
+            'CONFIG_(XLIB|LIBXCB|LIBXCB_SHM|LIBXCB_SHAPE|LIBXCB_XFIXES|XCBGRAB_INDEV)' \
+            config.h || true
+
+          if grep -E \
+            '^#define CONFIG_(XLIB|LIBXCB|LIBXCB_SHM|LIBXCB_SHAPE|LIBXCB_XFIXES|XCBGRAB_INDEV) 1$' \
+            config.h; then
+            echo "ERROR: X11/XCB support was enabled."
             exit 1
           fi
-      - name: Verify FFmpeg execution
+
+      - name: Build and install FFmpeg
+        shell: bash
         run: |
-          FFMPEG="$HOME/ffmpeg-build-arm64/bin/ffmpeg"
-          echo "=== ffmpeg -version ==="
+          set -euo pipefail
+
+          cd "$GITHUB_WORKSPACE/src/ffmpeg-${FFMPEG_VERSION}"
+          make -j"$(sysctl -n hw.ncpu)"
+          make install
+
+      - name: Verify binary and reject unwanted dynamic dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          FFMPEG="$TARGET_DIR/bin/ffmpeg"
+
+          test -x "$FFMPEG"
+          file "$FFMPEG" | grep -E 'arm64|ARM64'
+
+          echo "=== otool -L ==="
+          otool -L "$FFMPEG"
+
+          # Reject all Homebrew dependencies, including X11/XCB.
+          BAD_DEPS="$(
+            otool -L "$FFMPEG" | tail -n +2 | awk '{print $1}' |
+              grep -E '(^/opt/homebrew/|/libX11(\.[^/]+)?\.dylib|/libxcb[^/]*\.dylib)' ||
+              true
+          )"
+
+          if test -n "$BAD_DEPS"; then
+            echo "ERROR: unwanted runtime dependencies found:"
+            echo "$BAD_DEPS"
+            exit 1
+          fi
+
           "$FFMPEG" -version
-      - name: Verify required FFmpeg features
+
+      - name: Verify required CaptureStream2 features
+        shell: bash
         run: |
-          FFMPEG="$HOME/ffmpeg-build-arm64/bin/ffmpeg"
-          echo "=== MP3 encoder ==="
-          "$FFMPEG" -hide_banner -encoders | grep 'libmp3lame'
-          echo "=== HTTPS ==="
-          "$FFMPEG" -hide_banner -protocols | grep -E '^  https$'
-          echo "=== HLS demuxer ==="
-          "$FFMPEG" -hide_banner -demuxers | grep -E ' hls '
-          echo "=== HLS muxer ==="
-          "$FFMPEG" -hide_banner -muxers | grep -E ' hls '
-      - name: Archive arm64 binary
+          set -euo pipefail
+
+          FFMPEG="$TARGET_DIR/bin/ffmpeg"
+
+          "$FFMPEG" -hide_banner -encoders | grep -w libmp3lame
+          "$FFMPEG" -hide_banner -protocols | grep -w https
+          "$FFMPEG" -hide_banner -demuxers | grep -w hls
+          "$FFMPEG" -hide_banner -muxers | grep -w hls
+
+      - name: Package binary
+        shell: bash
         run: |
+          set -euo pipefail
+
           mkdir -p package
-          cp \
-            "$HOME/ffmpeg-build-arm64/bin/ffmpeg" \
-            package/ffmpeg
+          cp "$TARGET_DIR/bin/ffmpeg" package/ffmpeg
           chmod +x package/ffmpeg
-          tar -czf ffmpeg-macos-arm64.tar.gz \
-            -C package \
-            ffmpeg
-      - name: Upload arm64 artifact
+
+          tar -czf ffmpeg-macos-arm64.tar.gz -C package ffmpeg
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ffmpeg-macos-arm64
           path: ffmpeg-macos-arm64.tar.gz
+          if-no-files-found: error
