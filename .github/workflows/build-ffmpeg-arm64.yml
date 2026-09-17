@@ -9,7 +9,7 @@ jobs:
     runs-on: macos-14
 
     env:
-      FFMPEG_VERSION: "8.1"
+      FFMPEG_VERSION: "9.0.1"
       LAME_VERSION: "3.100"
       # Fixed source release. Update this deliberately when updating OpenSSL.
       OPENSSL_VERSION: "3.0.18"
