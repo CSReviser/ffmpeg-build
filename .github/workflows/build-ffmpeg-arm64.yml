@@ -97,7 +97,7 @@ jobs:
 
       - name: Build FFmpeg
         run: |
-          cd ffmpeg-8.1
+          cd ffmpeg-9.0.1
 
           make -j"$(sysctl -n hw.ncpu)"
           make install
