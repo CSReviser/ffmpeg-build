@@ -1,0 +1,143 @@
+name: Build FFmpeg (macOS arm64 Static)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ffmpeg-arm64:
+    # macos-latest is currently an Apple Silicon / arm64 runner.
+    runs-on: macos-latest
+
+    env:
+      ARCH: arm64
+      LAME_ROOT: ${{ github.workspace }}/local
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          brew update
+          brew install pkg-config automake autoconf libtool openssl@3
+
+      - name: Set up environment
+        run: |
+          OPENSSL_ROOT="$(brew --prefix openssl@3)"
+
+          echo "OPENSSL_ROOT=$OPENSSL_ROOT" >> "$GITHUB_ENV"
+          echo "PKG_CONFIG_PATH=$LAME_ROOT/lib/pkgconfig:$OPENSSL_ROOT/lib/pkgconfig" >> "$GITHUB_ENV"
+
+          echo "Architecture: $(uname -m)"
+          echo "OpenSSL: $OPENSSL_ROOT"
+
+      - name: Verify arm64 runner
+        run: |
+          test "$(uname -m)" = "arm64"
+
+      - name: Build libmp3lame
+        run: |
+          mkdir -p "$LAME_ROOT/src"
+          cd "$LAME_ROOT/src"
+
+          curl -fL -o lame-3.100.tar.gz \
+            https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz
+
+          tar -xzf lame-3.100.tar.gz
+          cd lame-3.100
+
+          ./configure \
+            --prefix="$LAME_ROOT" \
+            --disable-shared \
+            --enable-static \
+            --disable-nasm \
+            --enable-pkgconfig
+
+          make -j"$(sysctl -n hw.ncpu)"
+          make install
+
+      - name: Verify libmp3lame
+        run: |
+          test -f "$LAME_ROOT/lib/libmp3lame.a"
+          test -f "$LAME_ROOT/include/lame/lame.h"
+
+          file "$LAME_ROOT/lib/libmp3lame.a"
+
+      - name: Download FFmpeg
+        run: |
+          curl -fL -o ffmpeg-8.1.tar.xz \
+            https://ffmpeg.org/releases/ffmpeg-8.1.tar.xz
+
+          tar -xJf ffmpeg-8.1.tar.xz
+
+      - name: Configure FFmpeg
+        run: |
+          cd ffmpeg-8.1
+
+          TARGET_DIR="$HOME/ffmpeg-build-arm64"
+
+          ./configure \
+            --prefix="$TARGET_DIR" \
+            --cc=clang \
+            --arch=arm64 \
+            --pkg-config-flags="--static" \
+            --extra-cflags="-arch arm64 -I$LAME_ROOT/include -I$OPENSSL_ROOT/include" \
+            --extra-ldflags="-arch arm64 -L$LAME_ROOT/lib -L$OPENSSL_ROOT/lib" \
+            --enable-static \
+            --disable-shared \
+            --disable-debug \
+            --disable-doc \
+            --enable-gpl \
+            --enable-nonfree \
+            --enable-openssl \
+            --enable-libmp3lame \
+            --enable-protocol=https \
+            --enable-demuxer=hls \
+            --enable-muxer=hls
+
+      - name: Build FFmpeg
+        run: |
+          cd ffmpeg-8.1
+
+          make -j"$(sysctl -n hw.ncpu)"
+          make install
+
+      - name: Verify FFmpeg
+        run: |
+          FFMPEG="$HOME/ffmpeg-build-arm64/bin/ffmpeg"
+
+          test -x "$FFMPEG"
+
+          echo "=== Architecture ==="
+          file "$FFMPEG"
+
+          echo "=== FFmpeg configuration ==="
+          "$FFMPEG" -version
+
+          echo "=== libmp3lame ==="
+          "$FFMPEG" -hide_banner -encoders | grep -i mp3
+
+          echo "=== HTTPS ==="
+          "$FFMPEG" -hide_banner -protocols | grep -E '(^| )https( |$)'
+
+          echo "=== HLS ==="
+          "$FFMPEG" -hide_banner -demuxers | grep -E ' hls'
+          "$FFMPEG" -hide_banner -muxers | grep -E ' hls'
+
+      - name: Archive arm64 binary
+        run: |
+          mkdir -p package
+
+          cp "$HOME/ffmpeg-build-arm64/bin/ffmpeg" \
+             package/ffmpeg
+
+          chmod +x package/ffmpeg
+
+          tar -czf ffmpeg-macos-arm64.tar.gz \
+            -C package ffmpeg
+
+      - name: Upload arm64 binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-macos-arm64
+          path: ffmpeg-macos-arm64.tar.gz
