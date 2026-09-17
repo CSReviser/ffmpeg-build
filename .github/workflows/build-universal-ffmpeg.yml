@@ -15,7 +15,8 @@ jobs:
       - name: Download FFmpeg ARM (Apple Silicon)
         run: |
           wget -qO ffmpeg-arm.tar.gz https://github.com/CSReviser/ffmpeg-build/releases/download/9.0.1/ffmpeg-macos-arm64.tar.gz || { echo "Failed to download arm FFmpeg"; exit 1; }
-          tar -xzvf ffmpeg-arm.tar.gz ffmpeg-arm
+          tar -xzvf ffmpeg-arm.tar.gz ffmpeg
+          mv ffmpeg ffmpeg-arm
           chmod +x ffmpeg-arm
           
 #          unzip ffmpeg-arm.zip -d arm
