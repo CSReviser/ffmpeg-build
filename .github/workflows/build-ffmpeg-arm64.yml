@@ -6,10 +6,10 @@ on:
 jobs:
   build-ffmpeg-arm64:
     # GitHub-hosted Apple Silicon runner
-    runs-on: macos-14
+    runs-on: macos-latest
 
     env:
-      FFMPEG_VERSION: "9.0.1"
+      FFMPEG_VERSION: "9.0.2"
       LAME_VERSION: "3.100"
       # Fixed source release. Update this deliberately when updating OpenSSL.
       OPENSSL_VERSION: "3.0.18"
