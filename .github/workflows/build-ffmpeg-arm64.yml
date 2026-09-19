@@ -148,7 +148,6 @@ jobs:
             --enable-libtheora \
             --enable-libvidstab \
             --enable-libzimg \
-            --enable-libsvtav1 \
             --enable-ffplay \
             --enable-neon \
             --enable-runtime-cpudetect \
@@ -167,6 +166,7 @@ jobs:
 #            --enable-libopenjpeg \
 #            --enable-libopus \
 #            --enable-libsnappy \
+#            --enable-libsvtav1 \
       - name: Verify disabled X11 and XCB configuration
         shell: bash
         run: |
