@@ -149,7 +149,6 @@ jobs:
             --enable-libvpx \
             --enable-libwebp \
             --enable-libfreetype \
-            --enable-fontconfig \
             --enable-libtheora \
             --enable-libvorbis \
             --enable-libsnappy \
@@ -168,6 +167,7 @@ jobs:
 #            --cc=/usr/bin/clang \
 #            --enable-libaom \
 #            --enable-libass \
+#            --enable-fontconfig \
       - name: Verify disabled X11 and XCB configuration
         shell: bash
         run: |
