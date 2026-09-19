@@ -148,7 +148,6 @@ jobs:
             --enable-libvvenc \
             --enable-libvpx \
             --enable-libwebp \
-            --enable-libfreetype \
             --enable-libtheora \
             --enable-libvorbis \
             --enable-libsnappy \
@@ -168,6 +167,7 @@ jobs:
 #            --enable-libaom \
 #            --enable-libass \
 #            --enable-fontconfig \
+#            --enable-libfreetype \
       - name: Verify disabled X11 and XCB configuration
         shell: bash
         run: |
