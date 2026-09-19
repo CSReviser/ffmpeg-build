@@ -146,7 +146,6 @@ jobs:
             --enable-libvpx \
             --enable-libwebp \
             --enable-libtheora \
-            --enable-libsnappy \
             --enable-libvidstab \
             --enable-libzimg \
             --enable-libsvtav1 \
@@ -167,6 +166,7 @@ jobs:
 #            --enable-libkvazaar \
 #            --enable-libopenjpeg \
 #            --enable-libopus \
+#            --enable-libsnappy \
       - name: Verify disabled X11 and XCB configuration
         shell: bash
         run: |
