@@ -148,7 +148,6 @@ jobs:
             --enable-libvvenc \
             --enable-libvpx \
             --enable-libwebp \
-            --enable-libass \
             --enable-libfreetype \
             --enable-fontconfig \
             --enable-libtheora \
@@ -168,6 +167,7 @@ jobs:
 #            --extra-cflags=-fno-stack-check\
 #            --cc=/usr/bin/clang \
 #            --enable-libaom \
+#            --enable-libass \
       - name: Verify disabled X11 and XCB configuration
         shell: bash
         run: |
