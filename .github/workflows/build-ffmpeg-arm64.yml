@@ -140,7 +140,6 @@ jobs:
             --disable-libxcb-xfixes \
             --disable-indev=xcbgrab\
             --enable-libvmaf \
-            --enable-libopenjpeg \
             --enable-libopus \
             --enable-libmp3lame \
             --enable-libx264 \
@@ -168,6 +167,7 @@ jobs:
 #            --enable-libvorbis \
 #            --enable-libharfbuzz \
 #            --enable-libkvazaar \
+#            --enable-libopenjpeg \
       - name: Verify disabled X11 and XCB configuration
         shell: bash
         run: |
