@@ -139,9 +139,6 @@ jobs:
             --disable-libxcb-shape \
             --disable-libxcb-xfixes \
             --disable-indev=xcbgrab\
-            --extra-cflags=-fno-stack-check\
-            --cc=/usr/bin/clang \
-            --enable-gpl \
             --enable-libvmaf \
             --enable-libopenjpeg \
             --enable-libopus \
@@ -169,6 +166,8 @@ jobs:
             --disable-indev=qtkit \
             --disable-indev=x11grab_xcb
 #            --pkg-config-flags=--static \
+#            --extra-cflags=-fno-stack-check\
+#            --cc=/usr/bin/clang \
       - name: Verify disabled X11 and XCB configuration
         shell: bash
         run: |
