@@ -153,7 +153,6 @@ jobs:
             --enable-libvidstab \
             --enable-libzimg \
             --enable-libsvtav1 \
-            --enable-libkvazaar \
             --enable-ffplay \
             --enable-neon \
             --enable-runtime-cpudetect \
@@ -168,6 +167,7 @@ jobs:
 #            --enable-libfreetype \
 #            --enable-libvorbis \
 #            --enable-libharfbuzz \
+#            --enable-libkvazaar \
       - name: Verify disabled X11 and XCB configuration
         shell: bash
         run: |
