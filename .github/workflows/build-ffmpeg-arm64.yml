@@ -163,13 +163,12 @@ jobs:
             --enable-libsvtav1 \
             --enable-libharfbuzz \
             --enable-libkvazaar \
-            --pkg-config-flags=--static \
             --enable-ffplay \
             --enable-neon \
             --enable-runtime-cpudetect \
             --disable-indev=qtkit \
             --disable-indev=x11grab_xcb
-
+#            --pkg-config-flags=--static \
       - name: Verify disabled X11 and XCB configuration
         shell: bash
         run: |
