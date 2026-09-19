@@ -145,7 +145,6 @@ jobs:
             --enable-libvvenc \
             --enable-libvpx \
             --enable-libwebp \
-            --enable-libtheora \
             --enable-libvidstab \
             --enable-libzimg \
             --enable-ffplay \
@@ -167,6 +166,7 @@ jobs:
 #            --enable-libopus \
 #            --enable-libsnappy \
 #            --enable-libsvtav1 \
+#            --enable-libtheora \
       - name: Verify disabled X11 and XCB configuration
         shell: bash
         run: |
