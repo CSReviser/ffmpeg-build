@@ -142,7 +142,6 @@ jobs:
             --enable-libx264 \
             --enable-libx265 \
             --enable-libvvenc \
-            --enable-libvpx \
             --enable-libwebp \
             --enable-libzimg \
             --enable-ffplay \
@@ -167,6 +166,7 @@ jobs:
 #            --enable-libtheora \
 #            --enable-libvidstab \
 #            --enable-libvmaf \
+#            --enable-libvpx \
 #            --enable-libvpx \
       - name: Verify disabled X11 and XCB configuration
         shell: bash
