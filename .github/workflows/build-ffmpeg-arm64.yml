@@ -128,7 +128,6 @@ jobs:
             --disable-doc \
             --enable-gpl \
             --enable-version3 \
-            --enable-openssl \
             --enable-libmp3lame \
             --enable-protocol=https \
             --enable-demuxer=hls \
@@ -139,14 +138,6 @@ jobs:
             --disable-libxcb-shape \
             --disable-libxcb-xfixes \
             --disable-indev=xcbgrab\
-            --enable-libx264 \
-            --enable-libx265 \
-            --enable-libvvenc \
-            --enable-libwebp \
-            --enable-libzimg \
-            --enable-ffplay \
-            --enable-neon \
-            --enable-runtime-cpudetect \
             --disable-indev=qtkit \
             --disable-indev=x11grab_xcb
 #            --pkg-config-flags=--static \
@@ -168,6 +159,15 @@ jobs:
 #            --enable-libvmaf \
 #            --enable-libvpx \
 #            --enable-libvpx \
+#            --enable-libvvenc \
+#            --enable-openssl \
+#            --enable-libx264 \
+#            --enable-libx265 \
+#            --enable-libwebp \
+#            --enable-libzimg \
+#            --enable-ffplay \
+#            --enable-neon \
+#            --enable-runtime-cpudetect \
       - name: Verify disabled X11 and XCB configuration
         shell: bash
         run: |
