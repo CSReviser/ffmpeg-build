@@ -29,15 +29,19 @@ jobs:
 
       - name: Configure pkg-config
         run: |
-          PC_DIRS="$(find /usr -type f \
-            \( -name 'libmp3lame.pc' -o -name 'fdk-aac.pc' \) \
-            -printf '%h\n' 2>/dev/null | sort -u | paste -sd ':' -)"
+          PC_FILE="$(dpkg -L libmp3lame-dev | grep '/libmp3lame\.pc$' | head -n 1)"
 
-          if [ -n "$PC_DIRS" ]; then
-            echo "PKG_CONFIG_PATH=$PC_DIRS${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}" >> "$GITHUB_ENV"
+          if [ -z "$PC_FILE" ]; then
+            echo "libmp3lame.pc not found"
+            exit 1
           fi
 
-          echo "PKG_CONFIG_PATH=$PC_DIRS"
+          PC_DIR="$(dirname "$PC_FILE")"
+
+          echo "libmp3lame.pc: $PC_FILE"
+          echo "PKG_CONFIG_PATH: $PC_DIR"
+
+          echo "PKG_CONFIG_PATH=$PC_DIR${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}" >> "$GITHUB_ENV"
 
       - name: Check LAME
         run: |
