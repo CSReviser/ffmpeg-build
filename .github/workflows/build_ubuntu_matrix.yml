@@ -85,11 +85,11 @@ jobs:
           name: ffmpeg-24.04
           path: ffmpeg-static/ubuntu-24.04
 
-      - name: Download Ubuntu 26.04
-        uses: actions/download-artifact@v4
-        with:
-          name: ffmpeg-26.04
-          path: ffmpeg-static/ubuntu-26.04
+#      - name: Download Ubuntu 26.04
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: ffmpeg-26.04
+#          path: ffmpeg-static/ubuntu-26.04
 
       - name: Upload combined artifact
         uses: actions/upload-artifact@v4
