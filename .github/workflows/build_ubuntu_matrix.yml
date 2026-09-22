@@ -27,6 +27,18 @@ jobs:
             pkg-config texinfo nasm yasm \
             libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev
 
+      - name: Configure pkg-config
+        run: |
+          PC_DIRS="$(find /usr -type f \
+            \( -name 'libmp3lame.pc' -o -name 'fdk-aac.pc' \) \
+            -printf '%h\n' 2>/dev/null | sort -u | paste -sd ':' -)"
+
+          if [ -n "$PC_DIRS" ]; then
+            echo "PKG_CONFIG_PATH=$PC_DIRS${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}" >> "$GITHUB_ENV"
+          fi
+
+          echo "PKG_CONFIG_PATH=$PC_DIRS"
+
       - name: Check LAME
         run: |
           echo "=== packages ==="
