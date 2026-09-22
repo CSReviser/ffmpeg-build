@@ -34,7 +34,7 @@ jobs:
           set -euo pipefail
           curl -fL -o "lame-${LAME_VERSION}.tar.gz" \
             "https://downloads.sourceforge.net/project/lame/lame/${LAME_VERSION}/lame-${LAME_VERSION}.tar.gz"
-          
+          tar -xzf "lame-${LAME_VERSION}.tar.gz"     
           cd "$GITHUB_WORKSPACE/src/lame-${LAME_VERSION}"
           ./configure \
             --prefix="$LAME_ROOT" \
