@@ -27,6 +27,17 @@ jobs:
             pkg-config texinfo nasm yasm \
             libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev
 
+      - name: Check LAME
+        run: |
+          echo "=== packages ==="
+          dpkg -l | grep -E 'libmp3lame|lame' || true
+
+          echo "=== pkg-config ==="
+          pkg-config --modversion libmp3lame
+          pkg-config --cflags libmp3lame
+          pkg-config --libs libmp3lame
+          pkg-config --static --libs libmp3lame
+
       - name: Build FFmpeg
         run: |
           wget https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz
