@@ -17,6 +17,7 @@ jobs:
 
     env:
       FFMPEG_VERSION: "9.0.2"
+      LAME_VERSION: "3.100"
 
     steps:
       - name: Install dependencies
@@ -27,6 +28,25 @@ jobs:
             pkg-config texinfo nasm yasm \
             libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev
 
+      - name: Build static LAME
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL -o "lame-${LAME_VERSION}.tar.gz" \
+            "https://downloads.sourceforge.net/project/lame/lame/${LAME_VERSION}/lame-${LAME_VERSION}.tar.gz"
+          
+          cd "$GITHUB_WORKSPACE/src/lame-${LAME_VERSION}"
+          ./configure \
+            --prefix="$LAME_ROOT" \
+            --disable-shared \
+            --enable-static \
+            --disable-nasm
+          make -j"$(sysctl -n hw.ncpu)"
+          make install
+          test -f "$LAME_ROOT/lib/libmp3lame.a"
+          test -f "$LAME_ROOT/include/lame/lame.h"
+          file "$LAME_ROOT/lib/libmp3lame.a"
+          
       - name: Configure pkg-config
         run: |
           PC_FILE="$(dpkg -L libmp3lame-dev | grep '/libmp3lame\.pc$' | head -n 1)"
