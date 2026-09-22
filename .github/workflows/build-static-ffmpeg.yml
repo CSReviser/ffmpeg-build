@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
+      FFMPEG_VERSION: "9.0.2"
       PREFIX: ${{ github.workspace }}/ffmpeg-static
       DEPS: ${{ github.workspace }}/deps
 
@@ -50,9 +51,9 @@ jobs:
       - name: Build FFmpeg
         run: |
           cd "$GITHUB_WORKSPACE"
-          git clone https://github.com/FFmpeg/FFmpeg.git
-          cd FFmpeg
-          git checkout tags/n9.0.1
+          wget https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz
+          tar -xzf ffmpeg-${FFMPEG_VERSION}.tar.gz
+          cd ffmpeg-${FFMPEG_VERSION}
           ./configure \
             --prefix="$PREFIX" \
             --pkg-config-flags="--static" \
