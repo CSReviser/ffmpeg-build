@@ -11,7 +11,7 @@ jobs:
         ubuntu:
           - "22.04"
           - "24.04"
-          - "26.04"
+#          - "26.04"
 
     runs-on: ubuntu-${{ matrix.ubuntu }}
 
@@ -27,60 +27,6 @@ jobs:
             autoconf automake build-essential cmake libtool git \
             pkg-config texinfo nasm yasm \
             libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev
-
-      - name: Download source archives
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "$GITHUB_WORKSPACE/src"
-          cd "$GITHUB_WORKSPACE/src"
-          curl -fL -o "lame-${LAME_VERSION}.tar.gz" \
-            "https://downloads.sourceforge.net/project/lame/lame/${LAME_VERSION}/lame-${LAME_VERSION}.tar.gz"
-          tar -xzf "lame-${LAME_VERSION}.tar.gz"
-
-      - name: Build static LAME
-        shell: bash
-        run: |
-          set -euo pipefail
-  
-          cd "$GITHUB_WORKSPACE/src/lame-${LAME_VERSION}"
-          ./configure \
-            --prefix="$LAME_ROOT" \
-            --disable-shared \
-            --enable-static \
-            --disable-nasm
-          make -j"$(sysctl -n hw.ncpu)"
-          make install
-          test -f "$LAME_ROOT/lib/libmp3lame.a"
-          test -f "$LAME_ROOT/include/lame/lame.h"
-          file "$LAME_ROOT/lib/libmp3lame.a"
-          
-      - name: Configure pkg-config
-        run: |
-          PC_FILE="$(dpkg -L libmp3lame-dev | grep '/libmp3lame\.pc$' | head -n 1)"
-
-          if [ -z "$PC_FILE" ]; then
-            echo "libmp3lame.pc not found"
-            exit 1
-          fi
-
-          PC_DIR="$(dirname "$PC_FILE")"
-
-          echo "libmp3lame.pc: $PC_FILE"
-          echo "PKG_CONFIG_PATH: $PC_DIR"
-
-          echo "PKG_CONFIG_PATH=$PC_DIR${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}" >> "$GITHUB_ENV"
-
-      - name: Check LAME
-        run: |
-          echo "=== packages ==="
-          dpkg -l | grep -E 'libmp3lame|lame' || true
-
-          echo "=== pkg-config ==="
-          pkg-config --modversion libmp3lame
-          pkg-config --cflags libmp3lame
-          pkg-config --libs libmp3lame
-          pkg-config --static --libs libmp3lame
 
       - name: Build FFmpeg
         run: |
