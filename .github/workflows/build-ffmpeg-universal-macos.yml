@@ -67,17 +67,23 @@ jobs:
             --pkg-config-flags="--static" \
             --extra-cflags="$CFLAGS -I$LAME_ROOT/include -I$OPENSSL_ROOT/include" \
             --extra-ldflags="$LDFLAGS -L$LAME_ROOT/lib -L$OPENSSL_ROOT/lib" \
-            --enable-static \
             --disable-shared \
             --disable-debug \
             --disable-doc \
             --enable-gpl \
-            --enable-nonfree \
-            --enable-openssl \
+            --enable-version3 \
             --enable-libmp3lame \
             --enable-protocol=https \
             --enable-demuxer=hls \
-            --enable-muxer=hls
+            --enable-muxer=hls \
+            --disable-xlib \
+            --disable-libxcb \
+            --disable-libxcb-shm \
+            --disable-libxcb-shape \
+            --disable-libxcb-xfixes \
+            --disable-indev=xcbgrab\
+            --disable-indev=qtkit \
+            --disable-indev=x11grab_xcb
 
           make -j$(sysctl -n hw.ncpu)
           make install
