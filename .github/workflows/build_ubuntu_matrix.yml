@@ -41,9 +41,9 @@ jobs:
               | sudo tee "$PKGCONFIG_DIR/libmp3lame.pc" > /dev/null
           fi
 
-          pkg-config --modversion libmp3lame
-          pkg-config --cflags libmp3lame
-          pkg-config --libs libmp3lame
+#          pkg-config --modversion libmp3lame
+#          pkg-config --cflags libmp3lame
+#          pkg-config --libs libmp3lame
 
       - name: Build FFmpeg
         run: |
