@@ -55,7 +55,7 @@ jobs:
            --enable-static \
             --disable-debug \
             --disable-doc
-
+          grep -n -A20 -B10 "libmp3lame" ffmpeg-9.0.2/ffbuild/config.log
           make -j"$(nproc)"
           make install
 
