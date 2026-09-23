@@ -39,12 +39,12 @@ jobs:
               -e 's/^Description:.*$/Description: MP3 encoding library/' \
               "$PKGCONFIG_DIR/lame.pc" \
               | sudo tee "$PKGCONFIG_DIR/libmp3lame.pc" > /dev/null
+
+            pkg-config --modversion libmp3lame
+            pkg-config --cflags libmp3lame
+            pkg-config --libs libmp3lame
           fi
-
-#          pkg-config --modversion libmp3lame
-#          pkg-config --cflags libmp3lame
-#          pkg-config --libs libmp3lame
-
+          
       - name: Build FFmpeg
         run: |
           wget https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz
