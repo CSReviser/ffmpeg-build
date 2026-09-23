@@ -28,7 +28,7 @@ jobs:
 
       - name: Download FFmpeg Intel (x86_64)
         run: |
-          wget -qO ffmpeg-intel.7z https://www.videohelp.com/download/ffmpeg-9.0.2-macos64-static.7z || { echo "Failed to download FFmpeg-intel"; exit 1; }
+          wget -qO ffmpeg-intel.7z https://evermeet.cx/ffmpeg/ffmpeg-9.0.2.7z || { echo "Failed to download FFmpeg-intel"; exit 1; }
           7z x ffmpeg-intel.7z -offmpeg-intel
           mv ffmpeg-intel/ffmpeg ffmpeg-x86_64
           chmod +x ffmpeg-x86_64
