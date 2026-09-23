@@ -11,7 +11,7 @@ jobs:
         ubuntu:
           - "22.04"
           - "24.04"
-#          - "26.04"
+          - "26.04"
 
     runs-on: ubuntu-${{ matrix.ubuntu }}
 
@@ -27,6 +27,24 @@ jobs:
             autoconf automake build-essential cmake libtool git \
             pkg-config texinfo nasm yasm \
             libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev
+
+      - name: Check LAME files
+        run: |
+          echo "=== package files ==="
+          dpkg -L libmp3lame-dev
+
+          echo "=== headers ==="
+          find /usr/include -type f \
+            \( -name 'lame.h' -o -name '*lame*.h' \) \
+            -print
+
+          echo "=== libraries ==="
+          find /usr/lib -type f \
+            \( -name 'libmp3lame.a' -o -name 'libmp3lame.so*' \) \
+            -print
+
+          echo "=== architecture ==="
+          dpkg-architecture -qDEB_HOST_MULTIARCH
 
       - name: Build FFmpeg
         run: |
