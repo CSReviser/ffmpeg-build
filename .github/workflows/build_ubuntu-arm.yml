@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-26.04-arm  # または ubuntu-24.04 に変更可能
     env:
       FFMPEG_VERSION: "9.0.2"
+      UBUNTU_VERSION: "24.04"
     steps:
       - name: Install dependencies
         run: |
@@ -47,5 +48,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
-          name: ffmpeg-arm-static
+          name: ffmpeg-arm-static-${FFMPEG_VERSION}-${UBUNTU_VERSION}
           path: ~/ffmpeg-static/bin
