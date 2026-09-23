@@ -29,39 +29,6 @@ jobs:
             libssl-dev libmp3lame-dev libmpg123-dev \
             zlib1g-dev libfdk-aac-dev
 
-      - name: Check LAME
-        run: |
-          MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
-
-          cat > /tmp/test-lame.c <<'EOF'
-          #include <lame/lame.h>
-
-          int main(void)
-          {
-              lame_global_flags *gfp = lame_init();
-              if (!gfp)
-                  return 1;
-
-              lame_set_VBR_quality(gfp, 4.0f);
-              lame_close(gfp);
-
-              return 0;
-          }
-          EOF
-
-          gcc \
-            -I/usr/include \
-            -static \
-            -L"/usr/lib/$MULTIARCH" \
-            /tmp/test-lame.c \
-            -lmp3lame \
-            -lmpg123 \
-            -lm \
-            -o /tmp/test-lame
-
-          file /tmp/test-lame
-          /tmp/test-lame
-          
       - name: Build FFmpeg
         run: |
           wget https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz
@@ -69,11 +36,13 @@ jobs:
 
           cd ffmpeg-${FFMPEG_VERSION}
 
+          MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
+
           ./configure \
             --prefix="$HOME/ffmpeg-static" \
             --pkg-config-flags="--static" \
-            --extra-cflags="-static -I/usr/include" \
-            --extra-ldflags="-static -L/usr/lib" \
+            --extra-cflags="-I/usr/include" \
+            --extra-ldflags="-static -L/usr/lib/$MULTIARCH" \
             --enable-gpl \
             --enable-nonfree \
             --enable-libmp3lame \
@@ -83,7 +52,7 @@ jobs:
             --enable-protocol=https \
             --enable-protocol=hls \
             --disable-shared \
-            --enable-static \
+           --enable-static \
             --disable-debug \
             --disable-doc
 
