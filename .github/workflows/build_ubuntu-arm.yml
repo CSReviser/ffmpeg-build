@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04-arm  # または ubuntu-24.04 に変更可能
+    runs-on: ubuntu-26.04-arm  # または ubuntu-24.04 に変更可能
     env:
       FFMPEG_VERSION: "9.0.2"
     steps:
