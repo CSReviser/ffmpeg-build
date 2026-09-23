@@ -28,23 +28,22 @@ jobs:
             pkg-config texinfo nasm yasm \
             libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev
 
-      - name: Check LAME files
+      - name: Fix LAME pkg-config
         run: |
-          echo "=== package files ==="
-          dpkg -L libmp3lame-dev
+          MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
+          PKGCONFIG_DIR="/usr/lib/$MULTIARCH/pkgconfig"
 
-          echo "=== headers ==="
-          find /usr/include -type f \
-            \( -name 'lame.h' -o -name '*lame*.h' \) \
-            -print
+          if [ ! -f "$PKGCONFIG_DIR/libmp3lame.pc" ]; then
+            sed \
+              -e 's/^Name: lame$/Name: libmp3lame/' \
+              -e 's/^Description:.*$/Description: MP3 encoding library/' \
+              "$PKGCONFIG_DIR/lame.pc" \
+              | sudo tee "$PKGCONFIG_DIR/libmp3lame.pc" > /dev/null
+          fi
 
-          echo "=== libraries ==="
-          find /usr/lib -type f \
-            \( -name 'libmp3lame.a' -o -name 'libmp3lame.so*' \) \
-            -print
-
-          echo "=== architecture ==="
-          dpkg-architecture -qDEB_HOST_MULTIARCH
+          pkg-config --modversion libmp3lame
+          pkg-config --cflags libmp3lame
+          pkg-config --libs libmp3lame
 
       - name: Build FFmpeg
         run: |
@@ -103,11 +102,11 @@ jobs:
           name: ffmpeg-24.04
           path: ffmpeg-static/ubuntu-24.04
 
-#      - name: Download Ubuntu 26.04
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: ffmpeg-26.04
-#          path: ffmpeg-static/ubuntu-26.04
+      - name: Download Ubuntu 26.04
+        uses: actions/download-artifact@v4
+        with:
+          name: ffmpeg-26.04
+          path: ffmpeg-static/ubuntu-26.04
 
       - name: Upload combined artifact
         uses: actions/upload-artifact@v4
