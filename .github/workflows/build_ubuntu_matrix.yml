@@ -26,20 +26,12 @@ jobs:
           sudo apt install -y \
             autoconf automake build-essential cmake libtool git \
             pkg-config texinfo nasm yasm \
-            libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev
+            libssl-dev libmp3lame-dev libmpg123-dev \
+            zlib1g-dev libfdk-aac-dev
 
       - name: Check LAME
         run: |
           MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
-
-          echo "MULTIARCH=$MULTIARCH"
-          echo "LAME header:"
-          ls -l /usr/include/lame/lame.h
-
-          echo "LAME library:"
-          ls -l "/usr/lib/$MULTIARCH/libmp3lame.a"
-
-          echo "=== direct link test ==="
 
           cat > /tmp/test-lame.c <<'EOF'
           #include <lame/lame.h>
@@ -63,6 +55,7 @@ jobs:
             -L"/usr/lib/$MULTIARCH" \
             /tmp/test-lame.c \
             -lmp3lame \
+            -lmpg123 \
             -lm \
             -o /tmp/test-lame
 
