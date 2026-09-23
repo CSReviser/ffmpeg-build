@@ -28,18 +28,46 @@ jobs:
             pkg-config texinfo nasm yasm \
             libssl-dev libmp3lame-dev zlib1g-dev libfdk-aac-dev
 
-      - name: Fix LAME pkg-config
+      - name: Check LAME
         run: |
           MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
-          PKGCONFIG_DIR="/usr/lib/$MULTIARCH/pkgconfig"
 
-          if [ -f "$PKGCONFIG_DIR/lame.pc" ] &&
-             [ ! -f "$PKGCONFIG_DIR/libmp3lame.pc" ]; then
-            sudo ln -s lame.pc "$PKGCONFIG_DIR/libmp3lame.pc"
+          echo "MULTIARCH=$MULTIARCH"
+          echo "LAME header:"
+          ls -l /usr/include/lame/lame.h
 
-          pkg-config --modversion libmp3lame
+          echo "LAME library:"
+          ls -l "/usr/lib/$MULTIARCH/libmp3lame.a"
 
-          fi
+          echo "=== direct link test ==="
+
+          cat > /tmp/test-lame.c <<'EOF'
+          #include <lame/lame.h>
+
+          int main(void)
+          {
+              lame_global_flags *gfp = lame_init();
+              if (!gfp)
+                  return 1;
+
+              lame_set_VBR_quality(gfp, 4.0f);
+              lame_close(gfp);
+
+              return 0;
+          }
+          EOF
+
+          gcc \
+            -I/usr/include \
+            -static \
+            -L"/usr/lib/$MULTIARCH" \
+            /tmp/test-lame.c \
+            -lmp3lame \
+            -lm \
+            -o /tmp/test-lame
+
+          file /tmp/test-lame
+          /tmp/test-lame
           
       - name: Build FFmpeg
         run: |
