@@ -29,6 +29,26 @@ jobs:
             libssl-dev libmp3lame-dev libmpg123-dev \
             zlib1g-dev libfdk-aac-dev
 
+      - name: Build static mpg123
+        run: |
+          wget https://www.mpg123.de/download/mpg123-1.33.3.tar.bz2
+          tar -xjf mpg123-1.33.3.tar.bz2
+          cd mpg123-1.33.3
+
+          ./configure \
+            --prefix="$HOME/mpg123-static" \
+            --disable-shared \
+            --enable-static \
+            --disable-debug \
+            --disable-lfs-alias \
+            --with-default-audio=no
+
+          make -j$(nproc)
+          make install
+
+          echo "=== mpg123 static library ==="
+          ls -l "$HOME/mpg123-static/lib/"
+
       - name: Build FFmpeg
         run: |
           wget https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz
