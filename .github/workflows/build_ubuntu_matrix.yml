@@ -54,7 +54,7 @@ jobs:
             --disable-shared \
            --enable-static \
             --disable-debug \
-            --disable-doc
+            --disable-doc \
           || {
             echo "=== libmp3lame configure failure ==="
             grep -n -A30 -B10 "libmp3lame" ffbuild/config.log || true
