@@ -44,8 +44,8 @@ jobs:
           make install
           ~/ffmpeg-static/bin/ffmpeg -version
           ~/ffmpeg-static/bin/ffmpeg -help
-          mkdir -p ~/ffmpeg-static/bin/ffmpeg/${FFMPEG_VERSION}/${UBUNTU_VERSION}
-          cp ~/ffmpeg-static/bin/ffmpeg ~/ffmpeg-static/bin/ffmpeg/${FFMPEG_VERSION}/${UBUNTU_VERSION}
+          mkdir -p ~/ffmpeg-static/bin/${FFMPEG_VERSION}/${UBUNTU_VERSION}
+          cp ~/ffmpeg-static/bin/ffmpeg ~/ffmpeg-static/bin/${FFMPEG_VERSION}/${UBUNTU_VERSION}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v5
