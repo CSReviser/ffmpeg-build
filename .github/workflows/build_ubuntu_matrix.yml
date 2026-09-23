@@ -33,16 +33,12 @@ jobs:
           MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
           PKGCONFIG_DIR="/usr/lib/$MULTIARCH/pkgconfig"
 
-          if [ ! -f "$PKGCONFIG_DIR/libmp3lame.pc" ]; then
-            sed \
-              -e 's/^Name: lame$/Name: libmp3lame/' \
-              -e 's/^Description:.*$/Description: MP3 encoding library/' \
-              "$PKGCONFIG_DIR/lame.pc" \
-              | sudo tee "$PKGCONFIG_DIR/libmp3lame.pc" > /dev/null
+          if [ -f "$PKGCONFIG_DIR/lame.pc" ] &&
+             [ ! -f "$PKGCONFIG_DIR/libmp3lame.pc" ]; then
+            sudo ln -s lame.pc "$PKGCONFIG_DIR/libmp3lame.pc"
 
-            pkg-config --modversion libmp3lame
-            pkg-config --cflags libmp3lame
-            pkg-config --libs libmp3lame
+          pkg-config --modversion libmp3lame
+
           fi
           
       - name: Build FFmpeg
