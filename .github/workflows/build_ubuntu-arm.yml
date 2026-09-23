@@ -44,9 +44,10 @@ jobs:
           make install
           ~/ffmpeg-static/bin/ffmpeg -version
           ~/ffmpeg-static/bin/ffmpeg -help
+          mdir ~/ffmpeg-static/bin/ffmpeg/${FFMPEG_VERSION}/${UBUNTU_VERSION}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
-          name: ffmpeg-arm-static-${FFMPEG_VERSION}-${UBUNTU_VERSION}
+          name: ffmpeg-arm-static
           path: ~/ffmpeg-static/bin
