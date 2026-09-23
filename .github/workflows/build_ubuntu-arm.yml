@@ -5,10 +5,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04-arm  # または ubuntu-24.04 に変更可能
+    runs-on: ubuntu-22.04-arm  # または ubuntu-24.04 に変更可能
     env:
       FFMPEG_VERSION: "9.0.2"
-      UBUNTU_VERSION: "24.04"
+      UBUNTU_VERSION: "22.04"
     steps:
       - name: Install dependencies
         run: |
