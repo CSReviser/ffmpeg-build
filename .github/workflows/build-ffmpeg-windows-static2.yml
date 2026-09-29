@@ -51,7 +51,9 @@ jobs:
             sed \
             unzip \
             wget \
-            xz-utils
+            xz-utils \
+            gdk-pixbuf-csource \
+            libtool
 
       - name: Create FFmpeg recipe
         working-directory: mxe
