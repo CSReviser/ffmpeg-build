@@ -143,7 +143,6 @@ jobs:
                   --prefix='$(PREFIX)/$(TARGET)' \
                   --enable-static \
                   --disable-shared \
-                  --yasmexe='$(TARGET)-yasm' \
                   --disable-debug \
                   --disable-pthreads \
                   --enable-w32threads \
