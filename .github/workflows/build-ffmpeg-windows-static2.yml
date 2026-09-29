@@ -1,0 +1,249 @@
+name: Build FFmpeg Windows Static
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FFMPEG_VERSION: "9.0.2"
+  MXE_TARGET: "x86_64-w64-mingw32.static"
+
+jobs:
+  build:
+    name: FFmpeg  / Windows x64 static
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout MXE
+        run: |
+          git clone --depth 1 https://github.com/mxe/mxe.git mxe
+
+      - name: Install MXE host dependencies
+        run: |
+          sudo apt-get update
+
+          sudo apt-get install -y \
+            autoconf \
+            automake \
+            autopoint \
+            bash \
+            bison \
+            bzip2 \
+            flex \
+            g++ \
+            gettext \
+            gperf \
+            intltool \
+            libtool \
+            lzip \
+            make \
+            p7zip-full \
+            patch \
+            perl \
+            python3 \
+            python3-mako \
+            python3-packaging \
+            python3-setuptools \
+            python-is-python3 \
+            ruby \
+            sed \
+            unzip \
+            wget \
+            xz-utils
+
+      - name: Create FFmpeg recipe
+        working-directory: mxe
+        run: |
+          cat > src/ffmpeg.mk <<'EOF'
+          PKG             := ffmpeg
+          $(PKG)_WEBSITE  := https://ffmpeg.org/
+          $(PKG)_IGNORE   :=
+          $(PKG)_VERSION  := 9.0.2
+          $(PKG)_CHECKSUM :=
+          $(PKG)_SUBDIR   := $(PKG)-$($(PKG)_VERSION)
+          $(PKG)_FILE     := $(PKG)-$($(PKG)_VERSION).tar.xz
+          $(PKG)_URL      := https://ffmpeg.org/releases/$($(PKG)_FILE)
+
+          $(PKG)_DEPS     := cc bzip2 gnutls lame libass libbluray libbs2b libcaca \
+                             libvpx opencore-amr opus speex theora vidstab \
+                             vo-amrwbenc vorbis x264 xvidcore yasm zlib
+
+          # DO NOT ADD fdk-aac OR openssl SUPPORT.
+          # FFmpeg is built with GPL support and GnuTLS.
+          #
+          # This recipe intentionally does not enable:
+          #   --enable-libfdk-aac
+          #   --enable-openssl
+
+          define $(PKG)_UPDATE
+              $(WGET) -q -O- 'https://ffmpeg.org/releases/' | \
+                  $(SED) -n 's,.*ffmpeg-\([0-9][^>]*\)\.tar.*,\1,p' | \
+                  grep -v 'alpha\|beta\|rc\|git' | \
+                  $(SORT) -Vr | \
+                  head -1
+          endef
+
+          define $(PKG)_BUILD
+              cd '$(BUILD_DIR)' && '$(SOURCE_DIR)/configure' \
+                  --cross-prefix='$(TARGET)'- \
+                  --enable-cross-compile \
+                  --arch=x86_64 \
+                  --target-os=mingw32 \
+                  --prefix='$(PREFIX)/$(TARGET)' \
+                  --enable-static \
+                  --disable-shared \
+                  --yasmexe='$(TARGET)-yasm' \
+                  --disable-debug \
+                  --disable-pthreads \
+                  --enable-w32threads \
+                  --disable-doc \
+                  --enable-gpl \
+                  --enable-version3 \
+                  --enable-gnutls \
+                  --enable-libass \
+                  --enable-libbluray \
+                  --enable-libbs2b \
+                  --enable-libcaca \
+                  --enable-libmp3lame \
+                  --enable-libopencore-amrnb \
+                  --enable-libopencore-amrwb \
+                  --enable-libopus \
+                  --enable-libspeex \
+                  --enable-libtheora \
+                  --enable-libvidstab \
+                  --enable-libvo-amrwbenc \
+                  --enable-libvorbis \
+                  --enable-libvpx \
+                  --enable-libx264 \
+                  --enable-libxvid \
+                  --disable-sdl2 \
+                  --disable-xlib \
+                  --extra-libs='-mconsole' \
+                  --extra-ldflags="-static -fstack-protector"
+
+              $(MAKE) -C '$(BUILD_DIR)' -j '$(JOBS)'
+              $(MAKE) -C '$(BUILD_DIR)' -j 1 install
+          endef
+          EOF
+
+      - name: Download FFmpeg and calculate checksum
+        working-directory: mxe
+        env:
+          FFMPEG_VERSION: ${{ env.FFMPEG_VERSION }}
+        run: |
+          set -eux
+
+          URL="https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.xz"
+          FILE="ffmpeg-${FFMPEG_VERSION}.tar.xz"
+
+          mkdir -p pkg
+
+          echo "Downloading:"
+          echo "  ${URL}"
+
+          wget \
+            --https-only \
+            --tries=3 \
+            --timeout=30 \
+            -O "pkg/${FILE}" \
+            "${URL}"
+
+          CHECKSUM="$(sha256sum "pkg/${FILE}" | awk '{print $1}')"
+
+          echo
+          echo "FFmpeg version : ${FFMPEG_VERSION}"
+          echo "FFmpeg file    : ${FILE}"
+          echo "SHA-256        : ${CHECKSUM}"
+          echo
+
+          if [ "${#CHECKSUM}" -ne 64 ]; then
+            echo "Invalid SHA-256 checksum"
+            exit 1
+          fi
+
+          # Insert the calculated checksum into the MXE recipe.
+          sed -i \
+            "s/^\$(PKG)_CHECKSUM :=.*/\$(PKG)_CHECKSUM := ${CHECKSUM}/" \
+            src/ffmpeg.mk
+
+          echo "=== FFmpeg recipe checksum ==="
+          grep -E 'VERSION|CHECKSUM|FILE|URL' src/ffmpeg.mk
+
+      - name: Verify FFmpeg archive
+        working-directory: mxe
+        run: |
+          set -eux
+
+          FILE="ffmpeg-${FFMPEG_VERSION}.tar.xz"
+
+          CHECKSUM="$(grep '^\$(PKG)_CHECKSUM' src/ffmpeg.mk | awk '{print $3}')"
+
+          echo "${CHECKSUM}  pkg/${FILE}" | sha256sum -c -
+
+      - name: Build FFmpeg
+        working-directory: mxe
+        env:
+          MXE_TARGET: ${{ env.MXE_TARGET }}
+        run: |
+          make \
+            MXE_TARGETS="${MXE_TARGET}" \
+            JOBS="$(nproc)" \
+            ffmpeg
+
+      - name: Inspect FFmpeg
+        working-directory: mxe
+        run: |
+          set -eux
+
+          FFMPEG="usr/${MXE_TARGET}/bin/ffmpeg.exe"
+
+          echo "=== file ==="
+          file "${FFMPEG}"
+
+          echo
+          echo "=== size ==="
+          ls -lh "${FFMPEG}"
+
+          echo
+          echo "=== PE DLL dependencies ==="
+          x86_64-w64-mingw32-objdump \
+            -p "${FFMPEG}" \
+            | grep 'DLL Name' || true
+
+          echo
+          echo "=== version ==="
+          "${FFMPEG}" -version || true
+
+      - name: Prepare artifact
+        working-directory: mxe
+        env:
+          FFMPEG_VERSION: ${{ env.FFMPEG_VERSION }}
+          MXE_TARGET: ${{ env.MXE_TARGET }}
+        run: |
+          set -eux
+
+          mkdir -p ../dist
+
+          cp \
+            "usr/${MXE_TARGET}/bin/ffmpeg.exe" \
+            "../dist/ffmpeg-${FFMPEG_VERSION}-windows-x64-static.exe"
+
+          (
+            cd ../dist
+            sha256sum \
+              "ffmpeg-${FFMPEG_VERSION}-windows-x64-static.exe" \
+              > SHA256SUMS.txt
+          )
+
+          ls -lh ../dist
+          cat ../dist/SHA256SUMS.txt
+
+      - name: Upload FFmpeg
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-${{ env.FFMPEG_VERSION }}-windows-x64-static
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
