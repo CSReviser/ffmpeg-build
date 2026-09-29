@@ -16,7 +16,7 @@ env:
 
 jobs:
   build:
-    name: FFmpeg ${{ env.FFMPEG_VERSION }} / Windows x64 static
+    name: FFmpeg ${ env.FFMPEG_VERSION } / Windows x64 static
     runs-on: ubuntu-24.04
 
     steps:
