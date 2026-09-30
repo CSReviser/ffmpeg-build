@@ -1,4 +1,4 @@
-name: Build FFmpeg Windows Static
+name: Build FFmpeg Windows Static mxe
 
 on:
   workflow_dispatch:
