@@ -240,6 +240,75 @@ jobs:
             JOBS="$(nproc)" \
             ffmpeg
 
+- name: Build FFmpeg with MXE
+  run: |
+    set -o pipefail
+    cd mxe
+    make \
+      MXE_TARGETS="${MXE_TARGET}" \
+      JOBS="$(nproc)" \
+      ffmpeg
+- name: Show FFmpeg failure logs
+  if: failure()
+  shell: bash
+  run: |
+    set +e
+    TARGET="${MXE_TARGET:-x86_64-w64-mingw32.static}"
+    MXE_ROOT="${GITHUB_WORKSPACE}/mxe"
+    MXE_LOG="${MXE_ROOT}/log/ffmpeg_${TARGET}"
+    BUILD_DIR="${MXE_ROOT}/tmp-ffmpeg-${TARGET}"
+    echo "::group::MXE FFmpeg build log"
+    if [ -f "${MXE_LOG}" ]; then
+      cat "${MXE_LOG}"
+    else
+      echo "MXE log not found: ${MXE_LOG}"
+    fi
+    echo "::endgroup::"
+    CONFIG_LOG="$(find "${BUILD_DIR}" \
+      -type f \
+      -path "*/ffbuild/config.log" \
+      -print -quit 2>/dev/null)"
+    echo "::group::FFmpeg configure errors"
+    if [ -n "${CONFIG_LOG}" ]; then
+      echo "config.log: ${CONFIG_LOG}"
+      echo
+      grep -nEi \
+        'error|failed|failure|not found|cannot find|undefined reference|unknown option|unsupported' \
+        "${CONFIG_LOG}" \
+        | tail -n 300 || true
+    else
+      echo "ffbuild/config.log not found."
+    fi
+    echo "::endgroup::"
+    echo "::group::FFmpeg configure log"
+    if [ -n "${CONFIG_LOG}" ]; then
+      cat "${CONFIG_LOG}"
+    else
+      echo "ffbuild/config.log not found."
+    fi
+    echo "::endgroup::"
+    echo "::group::FFmpeg config.mak"
+    CONFIG_MAK="$(find "${BUILD_DIR}" \
+      -type f \
+      -path "*/ffbuild/config.mak" \
+      -print -quit 2>/dev/null)"
+    if [ -n "${CONFIG_MAK}" ]; then
+      cat "${CONFIG_MAK}"
+    else
+      echo "ffbuild/config.mak not found."
+    fi
+    echo "::endgroup::"
+    echo "::group::FFmpeg build files"
+    if [ -d "${BUILD_DIR}" ]; then
+      find "${BUILD_DIR}" \
+        -maxdepth 3 \
+        -type f \
+        | sort
+    else
+      echo "Build directory not found: ${BUILD_DIR}"
+    fi
+    echo "::endgroup::"
+
       - name: Inspect FFmpeg
         working-directory: mxe
         run: |
