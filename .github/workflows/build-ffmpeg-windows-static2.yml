@@ -168,7 +168,7 @@ jobs:
                   --enable-libxvid \
                   --disable-sdl2 \
                   --disable-xlib \
-                  --extra-libs='-mconsole' \
+                  --extra-libs="`'$(TARGET)-pkg-config' --libs libmpg123` -mconsole" \
                   --extra-ldflags="-static -fstack-protector"
 
               $(MAKE) -C '$(BUILD_DIR)' -j '$(JOBS)'
