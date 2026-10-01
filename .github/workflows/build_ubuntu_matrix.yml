@@ -63,6 +63,7 @@ jobs:
             --pkg-config-flags="--static" \
             --extra-cflags="-I/usr/include" \
             --extra-ldflags="-static -L/usr/lib/$MULTIARCH" \
+            --extra-libs="`'pkg-config' --libs libmpg123` -mconsole" \
             --enable-gpl \
             --enable-nonfree \
             --enable-libmp3lame \
