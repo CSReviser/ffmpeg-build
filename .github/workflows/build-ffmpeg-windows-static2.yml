@@ -348,6 +348,10 @@ jobs:
             "usr/${MXE_TARGET}/bin/ffmpeg.exe" \
             "../dist/ffmpeg-${FFMPEG_VERSION}-windows-x64-static.exe"
 
+          cp \
+            "usr/${MXE_TARGET}/bin/ffmpeg.exe" \
+            "../dist/ffmpeg.exe"
+            
           (
             cd ../dist
             sha256sum \
