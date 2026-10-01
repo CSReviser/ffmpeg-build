@@ -12,7 +12,7 @@ env:
 
 jobs:
   build:
-    name: FFmpeg  / Windows x64 static
+    name: FFmpeg  / Windows 32bit static
     runs-on: ubuntu-22.04
 
     steps:
