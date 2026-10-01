@@ -60,9 +60,8 @@ jobs:
 
           ./configure \
             --prefix="$HOME/ffmpeg-static" \
-            --pkg-config-flags="--static" \
+            --pkg-config-flags="--static  --libs libmpg123" \
             --extra-cflags="-I/usr/include" \
-            --extra-ldflags="-static -L/usr/lib/$MULTIARCH" \
             --enable-gpl \
             --enable-nonfree \
             --enable-libmp3lame \
