@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-${{ matrix.ubuntu }}
 
     env:
-      FFMPEG_VERSION: "9.0.2"
+      FFMPEG_VERSION: "9.1"
       LAME_VERSION: "3.100"
 
     steps:
