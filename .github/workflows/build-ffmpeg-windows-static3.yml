@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 env:
-  FFMPEG_VERSION: "9.0.2"
+  FFMPEG_VERSION: "9.1"
   MXE_TARGET: "i686-w64-mingw32.static"
 
 jobs:
