@@ -3,10 +3,13 @@ name: Build FFmpeg Windows ARM64 Static
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   FFMPEG_VERSION: "9.1"
   TARGET: "aarch64-w64-mingw32"
-  LLVM_MINGW_TAG: "20250320"
+  LLVM_MINGW_TAG: "20261117"
 
 jobs:
   build:
@@ -39,7 +42,7 @@ jobs:
           DIR_NAME="llvm-mingw-${LLVM_MINGW_TAG}-ucrt-ubuntu-22.04-x86_64"
           echo "$(pwd)/${DIR_NAME}/bin" >> "$GITHUB_PATH"
 
-      - name: Download and verify FFmpeg
+      - name: Download FFmpeg
         run: |
           set -eux
           URL="https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.xz"
