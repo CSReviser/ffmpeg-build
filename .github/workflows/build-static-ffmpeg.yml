@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      FFMPEG_VERSION: "9.0.2"
+      FFMPEG_VERSION: "9.1"
       PREFIX: ${{ github.workspace }}/ffmpeg-static
       DEPS: ${{ github.workspace }}/deps
 
