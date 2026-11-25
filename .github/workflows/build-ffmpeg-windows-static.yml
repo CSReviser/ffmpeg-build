@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 env:
-  FFMPEG_VERSION: "9.0.2"
+  FFMPEG_VERSION: "9.1"
   FFMPEG_SHA256: "733984395e0dbbe5c046abda2dc49a5544e7e0e1e2366bba849222ae9e3a03b1"
   MXE_TARGET: "x86_64-w64-mingw32.static"
 
@@ -88,7 +88,7 @@ jobs:
             PKG             := ffmpeg
             $(PKG)_WEBSITE  := https://ffmpeg.org/
             $(PKG)_IGNORE   :=
-            $(PKG)_VERSION  := 9.0.2
+            $(PKG)_VERSION  := 9.1
             $(PKG)_CHECKSUM := 733984395e0dbbe5c046abda2dc49a5544e7e0e1e2366bba849222ae9e3a03b1
             $(PKG)_SUBDIR   := $(PKG)-$($(PKG)_VERSION)
             $(PKG)_FILE     := $(PKG)-$($(PKG)_VERSION).tar.xz
